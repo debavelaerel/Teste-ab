@@ -4,6 +4,8 @@ import {
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
+export * from './auth-schema'
+
 export const experimentStatusEnum = pgEnum('ab_experiment_status', [
   'active', 'paused', 'finished',
 ])
