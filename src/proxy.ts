@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionCookie } from 'better-auth/cookies'
 
-export async function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const session = getSessionCookie(request)
   const { pathname } = request.nextUrl
 
@@ -24,5 +24,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$).*)'],
 }
