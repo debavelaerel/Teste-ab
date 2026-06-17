@@ -35,9 +35,12 @@ export async function PATCH(
     variants?: { id?: string; name: string; url: string; weight: number }[]
   }
 
-  if (name || cookieDays) {
+  if (name !== undefined || cookieDays !== undefined) {
     await db.update(abExperiments)
-      .set({ ...(name && { name }), ...(cookieDays && { cookieDays }) })
+      .set({
+        ...(name !== undefined && { name }),
+        ...(cookieDays !== undefined && { cookieDays }),
+      })
       .where(eq(abExperiments.id, id))
   }
 
