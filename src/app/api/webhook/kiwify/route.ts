@@ -39,18 +39,18 @@ export async function POST(request: NextRequest) {
   const order = payload['order'] as Record<string, unknown> | undefined
   const orderId = order?.['id'] as string | undefined
   const tracker = order?.['tracker'] as Record<string, unknown> | undefined
-  const utmContent = tracker?.['utm_content'] as string | undefined
+  const s1 = tracker?.['s1'] as string | undefined
   const amount = (order?.['product'] as Record<string, unknown> | undefined)?.['price'] ?? '0'
 
   // Always return 200 to prevent Kiwify retry storms
-  if (!orderId || !utmContent || !utmContent.includes(':')) {
+  if (!orderId || !s1 || !s1.includes(':')) {
     return NextResponse.json({ ok: true, reason: 'not trackable' })
   }
 
   // Use lastIndexOf to split slug from label (slug can contain colons, label never does)
-  const colonIdx = utmContent.lastIndexOf(':')
-  const slug = utmContent.slice(0, colonIdx)
-  const label = utmContent.slice(colonIdx + 1).toUpperCase()
+  const colonIdx = s1.lastIndexOf(':')
+  const slug = s1.slice(0, colonIdx)
+  const label = s1.slice(colonIdx + 1).toUpperCase()
 
   const experiment = await db.query.abExperiments.findFirst({
     where: eq(abExperiments.slug, slug),

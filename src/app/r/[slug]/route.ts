@@ -68,7 +68,7 @@ export async function GET(
 
   // Build destination URL with UTM tracking
   const destUrl = new URL(variant.url)
-  destUrl.searchParams.set('utm_content', `${slug}:${variant.label.toLowerCase()}`)
+  destUrl.searchParams.set('s1', `${slug}:${variant.label}`)
 
   const response = NextResponse.redirect(destUrl.toString(), { status: 302 })
 
