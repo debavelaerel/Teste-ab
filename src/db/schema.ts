@@ -65,7 +65,7 @@ export const abConversions = pgTable('ab_conversions', {
 
 // Relations
 export const experimentsRelations = relations(abExperiments, ({ many, one }) => ({
-  variants: many(abVariants),
+  variants: many(abVariants, { relationName: 'variants' }),
   winner: one(abVariants, {
     fields: [abExperiments.winnerVariantId],
     references: [abVariants.id],
@@ -77,6 +77,7 @@ export const variantsRelations = relations(abVariants, ({ one, many }) => ({
   experiment: one(abExperiments, {
     fields: [abVariants.experimentId],
     references: [abExperiments.id],
+    relationName: 'variants',
   }),
   visits: many(abVisits),
   conversions: many(abConversions),
