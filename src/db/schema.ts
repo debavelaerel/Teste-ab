@@ -1,6 +1,6 @@
 import {
   pgTable, pgEnum, uuid, varchar, integer,
-  decimal, timestamp, unique,
+  decimal, timestamp, unique, index, type AnyPgColumn,
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
@@ -14,7 +14,7 @@ export const abExperiments = pgTable('ab_experiments', {
   slug: varchar('slug', { length: 100 }).notNull().unique(),
   status: experimentStatusEnum('status').default('active').notNull(),
   cookieDays: integer('cookie_days').default(30).notNull(),
-  winnerVariantId: uuid('winner_variant_id'),
+  winnerVariantId: uuid('winner_variant_id').references((): AnyPgColumn => abVariants.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   finishedAt: timestamp('finished_at'),
 })
@@ -57,7 +57,9 @@ export const abConversions = pgTable('ab_conversions', {
   kiwifyOrderId: varchar('kiwify_order_id', { length: 255 }).notNull().unique(),
   amount: decimal('amount', { precision: 10, scale: 2 }).notNull().default('0'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-})
+}, (t) => [
+  index('ab_conv_exp_idx').on(t.experimentId, t.variantId),
+])
 
 // Relations
 export const experimentsRelations = relations(abExperiments, ({ many, one }) => ({
@@ -76,6 +78,7 @@ export const variantsRelations = relations(abVariants, ({ one, many }) => ({
   }),
   visits: many(abVisits),
   conversions: many(abConversions),
+  wonExperiments: many(abExperiments, { relationName: 'winner' }),
 }))
 
 export const visitsRelations = relations(abVisits, ({ one }) => ({

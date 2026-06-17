@@ -1,0 +1,2 @@
+ALTER TABLE "ab_experiments" ADD CONSTRAINT "ab_experiments_winner_variant_id_ab_variants_id_fk" FOREIGN KEY ("winner_variant_id") REFERENCES "public"."ab_variants"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "ab_conv_exp_idx" ON "ab_conversions" USING btree ("experiment_id","variant_id");
