@@ -31,7 +31,7 @@ export async function PATCH(
       update.finishedAt = new Date()
       if (body.winnerVariantId) update.winnerVariantId = body.winnerVariantId
     }
-    await db.update(abExperiments).set(update).where(eq(abExperiments.id, id))
+    await db.update(abExperiments).set(update).where(and(eq(abExperiments.id, id), eq(abExperiments.orgId, org.id)))
     return NextResponse.json({ ok: true })
   }
 
@@ -47,7 +47,7 @@ export async function PATCH(
         ...(name !== undefined && { name }),
         ...(cookieDays !== undefined && { cookieDays }),
       })
-      .where(eq(abExperiments.id, id))
+      .where(and(eq(abExperiments.id, id), eq(abExperiments.orgId, org.id)))
   }
 
   if (variants) {
@@ -82,6 +82,6 @@ export async function DELETE(
   })
   if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  await db.delete(abExperiments).where(eq(abExperiments.id, id))
+  await db.delete(abExperiments).where(and(eq(abExperiments.id, id), eq(abExperiments.orgId, org.id)))
   return NextResponse.json({ ok: true })
 }
