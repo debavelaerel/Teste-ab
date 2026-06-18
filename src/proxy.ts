@@ -5,11 +5,10 @@ export function proxy(request: NextRequest) {
   const session = getSessionCookie(request)
   const { pathname } = request.nextUrl
 
-  // Public routes: /login, /r/*, /api/*, /tracker.js
+  // /api/* is excluded from the matcher below — API routes do their own auth
   const isPublic =
     pathname.startsWith('/login') ||
     pathname.startsWith('/r/') ||
-    pathname.startsWith('/api/') ||
     pathname === '/tracker.js'
 
   if (!isPublic && !session) {
@@ -17,12 +16,13 @@ export function proxy(request: NextRequest) {
   }
 
   if (pathname === '/login' && session) {
-    return NextResponse.redirect(new URL('/', request.url))
+    return NextResponse.redirect(new URL('/org', request.url))
   }
 
   return NextResponse.next()
 }
 
 export const config = {
+  // Keep api excluded: API routes handle auth themselves via requireOrgMember
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$).*)'],
 }
