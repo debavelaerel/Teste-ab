@@ -1,13 +1,14 @@
 import { notFound } from 'next/navigation'
-import { eq, and } from 'drizzle-orm'
+import { eq, sql, count, sum, and } from 'drizzle-orm'
+import { Suspense } from 'react'
 import { db } from '@/db'
-import { abExperiments } from '@/db/schema'
-import { ExperimentForm } from '@/components/experiment-form'
-import { Badge } from '@/components/ui/badge'
-import Link from 'next/link'
+import { abExperiments, abVisits, abConversions } from '@/db/schema'
 import { requireOrgMember } from '@/lib/require-org-member'
+import { ExperimentTabs } from '@/components/experiment-tabs'
 
-export default async function ExperimentConfigPage({
+export const dynamic = 'force-dynamic'
+
+export default async function ExperimentPage({
   params,
 }: {
   params: Promise<{ orgSlug: string; expSlug: string }>
@@ -19,52 +20,98 @@ export default async function ExperimentConfigPage({
     where: and(eq(abExperiments.slug, expSlug), eq(abExperiments.orgId, org.id)),
     with: { variants: true },
   })
-
   if (!experiment) notFound()
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL
-  const redirectorUrl = `${appUrl}/r/${orgSlug}/${expSlug}`
+  const id = experiment.id
+
+  const [visitRows, convRows, dailyVisitRows, dailyConvRows] = await Promise.all([
+    db
+      .select({ variantId: abVisits.variantId, visits: count() })
+      .from(abVisits)
+      .where(eq(abVisits.experimentId, id))
+      .groupBy(abVisits.variantId),
+    db
+      .select({ variantId: abConversions.variantId, conversions: count(), revenue: sum(abConversions.amount) })
+      .from(abConversions)
+      .where(eq(abConversions.experimentId, id))
+      .groupBy(abConversions.variantId),
+    db
+      .select({
+        date: sql<string>`DATE(${abVisits.createdAt})`,
+        variantId: abVisits.variantId,
+        visits: count(),
+      })
+      .from(abVisits)
+      .where(eq(abVisits.experimentId, id))
+      .groupBy(sql`DATE(${abVisits.createdAt})`, abVisits.variantId)
+      .orderBy(sql`DATE(${abVisits.createdAt})`),
+    db
+      .select({
+        date: sql<string>`DATE(${abConversions.createdAt})`,
+        variantId: abConversions.variantId,
+        conversions: count(),
+      })
+      .from(abConversions)
+      .where(eq(abConversions.experimentId, id))
+      .groupBy(sql`DATE(${abConversions.createdAt})`, abConversions.variantId)
+      .orderBy(sql`DATE(${abConversions.createdAt})`),
+  ])
+
+  const variants = experiment.variants.map(v => {
+    const vr = visitRows.find(r => r.variantId === v.id)
+    const cr = convRows.find(r => r.variantId === v.id)
+    const visits = Number(vr?.visits ?? 0)
+    const conversions = Number(cr?.conversions ?? 0)
+    return {
+      id: v.id,
+      label: v.label,
+      name: v.name,
+      color: v.color,
+      visits,
+      conversions,
+      rate: visits > 0 ? conversions / visits : 0,
+      revenue: cr?.revenue ?? '0',
+    }
+  })
+
+  const allDates = [
+    ...new Set([
+      ...dailyVisitRows.map(r => r.date),
+      ...dailyConvRows.map(r => r.date),
+    ]),
+  ].sort()
+
+  const dailyData = allDates.map(date => {
+    const entry: Record<string, string | number> = { date }
+    for (const v of experiment.variants) {
+      const dv = dailyVisitRows.find(r => r.date === date && r.variantId === v.id)
+      const dc = dailyConvRows.find(r => r.date === date && r.variantId === v.id)
+      const visits = Number(dv?.visits ?? 0)
+      const conversions = Number(dc?.conversions ?? 0)
+      entry[v.label] = visits > 0 ? conversions / visits : 0
+    }
+    return entry
+  })
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
 
   return (
-    <div className="max-w-2xl">
-      <div className="flex items-center gap-3 mb-6">
-        <h1 className="text-2xl font-semibold">{experiment.name}</h1>
-        <Badge>{experiment.status}</Badge>
-        <Link
-          href={`/org/${orgSlug}/experiments/${expSlug}/results`}
-          className="ml-auto text-sm text-muted-foreground hover:underline"
-        >
-          Ver resultados →
-        </Link>
-      </div>
-
-      <div className="mb-6 p-3 rounded-md bg-muted text-sm font-mono break-all">
-        {redirectorUrl}
-      </div>
-
-      <div className="mb-6">
-        <p className="text-sm font-medium mb-2">Script para instalar na landing page:</p>
-        <pre className="bg-muted rounded-md p-3 text-xs overflow-x-auto">
-{experiment.checkoutType === 'hotmart'
-  ? `<script src="${appUrl}/tracker-hotmart.js"></script>`
-  : `<script src="${appUrl}/tracker.js"></script>`}
-        </pre>
-      </div>
-
-      <ExperimentForm
+    <Suspense>
+      <ExperimentTabs
         orgSlug={orgSlug}
-        experimentId={experiment.id}
-        initialName={experiment.name}
-        initialSlug={experiment.slug}
-        initialCookieDays={experiment.cookieDays}
-        initialCheckoutType={experiment.checkoutType as 'kiwify' | 'hotmart'}
-        initialVariants={experiment.variants.map(v => ({
-          id: v.id,
-          name: v.name,
-          url: v.url,
-          weight: v.weight,
-        }))}
+        experiment={{
+          id: experiment.id,
+          name: experiment.name,
+          slug: experiment.slug,
+          status: experiment.status,
+          checkoutType: experiment.checkoutType,
+          cookieDays: experiment.cookieDays,
+          variants: experiment.variants,
+        }}
+        variants={variants}
+        dailyData={dailyData}
+        appUrl={appUrl}
       />
-    </div>
+    </Suspense>
   )
 }
