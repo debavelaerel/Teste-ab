@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { randomUUID } from 'crypto'
 import { db } from '@/db'
-import { abExperiments, abVariants, abVisits } from '@/db/schema'
+import { abExperiments, abOrganizations, abVariants, abVisits } from '@/db/schema'
 
 function weightedRandom(variants: { label: string; weight: number }[]): string {
   const total = variants.reduce((s, v) => s + v.weight, 0)
@@ -16,23 +16,42 @@ function weightedRandom(variants: { label: string; weight: number }[]): string {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ orgSlug: string; expSlug: string }> }
 ) {
-  const { slug } = await params
+  const { orgSlug, expSlug } = await params
 
-  const experiment = await db.query.abExperiments.findFirst({
-    where: eq(abExperiments.slug, slug),
-    with: { variants: true },
-  })
+  // Find experiment by org slug + experiment slug
+  const expRows = await db
+    .select({ experiment: abExperiments })
+    .from(abExperiments)
+    .innerJoin(abOrganizations, eq(abExperiments.orgId, abOrganizations.id))
+    .where(
+      and(
+        eq(abOrganizations.slug, orgSlug),
+        eq(abExperiments.slug, expSlug)
+      )
+    )
+    .limit(1)
 
-  // Fallback: redirect home if experiment not found or has no variants
-  if (!experiment || experiment.variants.length === 0) {
-    const fallbackResponse = NextResponse.redirect(new URL('/', request.url), { status: 302 })
-    fallbackResponse.headers.set('Cache-Control', 'no-store')
-    return fallbackResponse
+  if (expRows.length === 0) {
+    const res = NextResponse.redirect(new URL('/', request.url), { status: 302 })
+    res.headers.set('Cache-Control', 'no-store')
+    return res
   }
 
-  const cookieName = `ab_${slug}`
+  const experiment = expRows[0].experiment
+
+  const variants = await db.query.abVariants.findMany({
+    where: eq(abVariants.experimentId, experiment.id),
+  })
+
+  if (variants.length === 0) {
+    const res = NextResponse.redirect(new URL('/', request.url), { status: 302 })
+    res.headers.set('Cache-Control', 'no-store')
+    return res
+  }
+
+  const cookieName = `ab_${orgSlug}_${expSlug}`
   const existingCookie = request.cookies.get(cookieName)?.value
 
   let visitorId: string
@@ -46,15 +65,13 @@ export async function GET(
     visitorId = randomUUID()
     variantLabel =
       experiment.status === 'active'
-        ? weightedRandom(experiment.variants)
-        : experiment.variants[0].label
+        ? weightedRandom(variants)
+        : variants[0].label
   }
 
   const variant =
-    experiment.variants.find((v) => v.label === variantLabel) ??
-    experiment.variants[0]
+    variants.find((v) => v.label === variantLabel) ?? variants[0]
 
-  // Register visit server-side (deduped — unique constraint on experiment+visitor)
   if (experiment.status === 'active') {
     await db
       .insert(abVisits)
@@ -66,9 +83,8 @@ export async function GET(
       .onConflictDoNothing()
   }
 
-  // Build destination URL with UTM tracking
   const destUrl = new URL(variant.url)
-  destUrl.searchParams.set('s1', `${slug}:${variant.label}`)
+  destUrl.searchParams.set('s1', `${orgSlug}:${expSlug}:${variant.label}`)
 
   const response = NextResponse.redirect(destUrl.toString(), { status: 302 })
 
@@ -80,8 +96,6 @@ export async function GET(
     path: '/',
   })
 
-  // Prevent Cloudflare (and any CDN) from caching the redirect
   response.headers.set('Cache-Control', 'no-store')
-
   return response
 }
