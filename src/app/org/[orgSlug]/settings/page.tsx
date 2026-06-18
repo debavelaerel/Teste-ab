@@ -1,10 +1,5 @@
 import { requireOrgMember } from '@/lib/require-org-member'
-
-function maskToken(token: string | undefined): string {
-  if (!token) return '(não configurado)'
-  if (token.length <= 8) return '•'.repeat(token.length)
-  return token.slice(0, 4) + '•'.repeat(token.length - 8) + token.slice(-4)
-}
+import { TokenField } from '@/components/token-field'
 
 export default async function SettingsPage({
   params,
@@ -13,9 +8,6 @@ export default async function SettingsPage({
 }) {
   const { orgSlug } = await params
   const { org } = await requireOrgMember(orgSlug)
-
-  const kiwifyToken = process.env.KIWIFY_WEBHOOK_SECRET
-  const hotmartToken = process.env.HOTMART_WEBHOOK_TOKEN
 
   return (
     <div className="max-w-2xl">
@@ -47,15 +39,11 @@ export default async function SettingsPage({
         <div className="border rounded-lg divide-y">
           <div className="flex items-center justify-between px-4 py-3">
             <span className="text-sm text-muted-foreground">Kiwify webhook secret</span>
-            <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
-              {maskToken(kiwifyToken)}
-            </code>
+            <TokenField value={process.env.KIWIFY_WEBHOOK_SECRET} />
           </div>
           <div className="flex items-center justify-between px-4 py-3">
             <span className="text-sm text-muted-foreground">Hotmart webhook token</span>
-            <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
-              {maskToken(hotmartToken)}
-            </code>
+            <TokenField value={process.env.HOTMART_WEBHOOK_TOKEN} />
           </div>
         </div>
       </section>
