@@ -30,7 +30,7 @@ export default async function OrgLayout({
     org = result.org
   } catch (e) {
     if (e instanceof AuthError) {
-      redirect(e.status === 403 ? '/org' : '/login')
+      redirect(e.status === 403 ? '/org' : '/login?_=1')
     }
     throw e
   }

@@ -7,7 +7,7 @@ import { abMemberships, abOrganizations } from '@/db/schema'
 
 export default async function OrgRootPage() {
   const session = await auth.api.getSession({ headers: await headers() })
-  if (!session) redirect('/login')
+  if (!session) redirect('/login?_=1')
 
   const rows = await db
     .select({ org: abOrganizations })

@@ -17,6 +17,13 @@ export function proxy(request: NextRequest) {
   }
 
   if (pathname === '/login' && session) {
+    // ?_=1 sentinel means the app detected a stale/invalid session — clear it and let through
+    if (request.nextUrl.searchParams.has('_')) {
+      const res = NextResponse.redirect(new URL('/login', request.url))
+      res.cookies.set('better-auth.session_token', '', { expires: new Date(0), path: '/' })
+      res.cookies.set('__Secure-better-auth.session_token', '', { expires: new Date(0), path: '/' })
+      return res
+    }
     return NextResponse.redirect(new URL('/org', request.url))
   }
 
