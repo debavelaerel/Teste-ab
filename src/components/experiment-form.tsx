@@ -14,6 +14,7 @@ interface VariantRow {
 }
 
 interface Props {
+  orgSlug: string
   experimentId?: string
   initialName?: string
   initialSlug?: string
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export function ExperimentForm({
+  orgSlug,
   experimentId,
   initialName = '',
   initialSlug = '',
@@ -78,17 +80,15 @@ export function ExperimentForm({
     setError('')
 
     const payload = { name, slug, cookieDays, variants }
-    const res = experimentId
-      ? await fetch(`/api/experiments/${experimentId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        })
-      : await fetch('/api/experiments', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        })
+    const url = experimentId
+      ? `/api/org/${orgSlug}/experiments/${experimentId}`
+      : `/api/org/${orgSlug}/experiments`
+
+    const res = await fetch(url, {
+      method: experimentId ? 'PATCH' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
 
     const data = await res.json()
     setLoading(false)
@@ -98,7 +98,8 @@ export function ExperimentForm({
       return
     }
 
-    router.push(experimentId ? `/experiments/${slug}` : `/experiments/${data.slug}`)
+    const expSlug = experimentId ? slug : data.slug
+    router.push(`/org/${orgSlug}/experiments/${expSlug}`)
     router.refresh()
   }
 
@@ -113,7 +114,7 @@ export function ExperimentForm({
               setName(e.target.value)
               if (!experimentId) setSlug(autoSlug(e.target.value))
             }}
-            placeholder="Destrava OAB"
+            placeholder="Meu experimento"
             required
           />
         </div>
@@ -122,11 +123,11 @@ export function ExperimentForm({
           <Input
             value={slug}
             onChange={e => setSlug(autoSlug(e.target.value))}
-            placeholder="destrava-oab"
+            placeholder="meu-experimento"
             required
             disabled={!!experimentId}
           />
-          {slug && <p className="text-xs text-muted-foreground">/r/{slug}</p>}
+          {slug && <p className="text-xs text-muted-foreground">/r/{orgSlug}/{slug}</p>}
         </div>
       </div>
 
@@ -141,15 +142,10 @@ export function ExperimentForm({
         />
       </div>
 
-      {/* Variants */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <Label>Variantes</Label>
-          <span
-            className={`text-xs font-medium ${
-              totalWeight === 100 ? 'text-green-500' : 'text-destructive'
-            }`}
-          >
+          <span className={`text-xs font-medium ${totalWeight === 100 ? 'text-green-500' : 'text-destructive'}`}>
             Soma: {totalWeight}%
           </span>
         </div>
@@ -157,9 +153,7 @@ export function ExperimentForm({
           {variants.map((v, i) => (
             <Card key={i} className="p-3">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-bold w-6 text-center">
-                  {String.fromCharCode(65 + i)}
-                </span>
+                <span className="text-xs font-bold w-6 text-center">{String.fromCharCode(65 + i)}</span>
                 <Input
                   value={v.name}
                   onChange={e => updateVariant(i, 'name', e.target.value)}
@@ -176,14 +170,7 @@ export function ExperimentForm({
                 />
                 <span className="text-xs text-muted-foreground">%</span>
                 {variants.length > 2 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeVariant(i)}
-                  >
-                    ✕
-                  </Button>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => removeVariant(i)}>✕</Button>
                 )}
               </div>
               <Input
@@ -197,13 +184,7 @@ export function ExperimentForm({
           ))}
         </div>
         {variants.length < 5 && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="mt-3"
-            onClick={addVariant}
-          >
+          <Button type="button" variant="outline" size="sm" className="mt-3" onClick={addVariant}>
             + Adicionar variante
           </Button>
         )}
