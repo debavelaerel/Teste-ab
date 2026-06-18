@@ -1,10 +1,28 @@
 import {
-  pgTable, pgEnum, uuid, varchar, integer,
+  pgTable, pgEnum, uuid, varchar, integer, text,
   decimal, timestamp, unique, index, type AnyPgColumn,
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
 export * from './auth-schema'
+import { user } from './auth-schema'
+
+export const abOrganizations = pgTable('ab_organizations', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 100 }).notNull().unique(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+export const abMemberships = pgTable('ab_memberships', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  orgId: uuid('org_id').notNull().references(() => abOrganizations.id, { onDelete: 'cascade' }),
+  role: varchar('role', { length: 20 }).notNull().default('admin'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (t) => [
+  unique('ab_memberships_user_org_unique').on(t.userId, t.orgId),
+])
 
 export const experimentStatusEnum = pgEnum('ab_experiment_status', [
   'active', 'paused', 'finished',
@@ -12,14 +30,18 @@ export const experimentStatusEnum = pgEnum('ab_experiment_status', [
 
 export const abExperiments = pgTable('ab_experiments', {
   id: uuid('id').defaultRandom().primaryKey(),
+  orgId: uuid('org_id').notNull().references(() => abOrganizations.id, { onDelete: 'cascade' }),
   name: varchar('name', { length: 255 }).notNull(),
-  slug: varchar('slug', { length: 100 }).notNull().unique(),
+  slug: varchar('slug', { length: 100 }).notNull(),
   status: experimentStatusEnum('status').default('active').notNull(),
   cookieDays: integer('cookie_days').default(30).notNull(),
   winnerVariantId: uuid('winner_variant_id').references((): AnyPgColumn => abVariants.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   finishedAt: timestamp('finished_at'),
-})
+}, (t) => [
+  unique('ab_exp_slug_org_unique').on(t.orgId, t.slug),
+  index('ab_exp_org_idx').on(t.orgId),
+])
 
 export const abVariants = pgTable('ab_variants', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -65,11 +87,27 @@ export const abConversions = pgTable('ab_conversions', {
 
 // Relations
 export const experimentsRelations = relations(abExperiments, ({ many, one }) => ({
+  org: one(abOrganizations, {
+    fields: [abExperiments.orgId],
+    references: [abOrganizations.id],
+  }),
   variants: many(abVariants, { relationName: 'variants' }),
   winner: one(abVariants, {
     fields: [abExperiments.winnerVariantId],
     references: [abVariants.id],
     relationName: 'winner',
+  }),
+}))
+
+export const organizationsRelations = relations(abOrganizations, ({ many }) => ({
+  memberships: many(abMemberships),
+  experiments: many(abExperiments),
+}))
+
+export const membershipsRelations = relations(abMemberships, ({ one }) => ({
+  org: one(abOrganizations, {
+    fields: [abMemberships.orgId],
+    references: [abOrganizations.id],
   }),
 }))
 
@@ -98,3 +136,5 @@ export type Experiment = typeof abExperiments.$inferSelect
 export type Variant = typeof abVariants.$inferSelect
 export type Visit = typeof abVisits.$inferSelect
 export type Conversion = typeof abConversions.$inferSelect
+export type Organization = typeof abOrganizations.$inferSelect
+export type Membership = typeof abMemberships.$inferSelect
