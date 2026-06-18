@@ -35,6 +35,7 @@ export const abExperiments = pgTable('ab_experiments', {
   slug: varchar('slug', { length: 100 }).notNull(),
   status: experimentStatusEnum('status').default('active').notNull(),
   cookieDays: integer('cookie_days').default(30).notNull(),
+  checkoutType: varchar('checkout_type', { length: 20 }).notNull().default('kiwify'),
   winnerVariantId: uuid('winner_variant_id').references((): AnyPgColumn => abVariants.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   finishedAt: timestamp('finished_at'),
@@ -78,11 +79,13 @@ export const abConversions = pgTable('ab_conversions', {
     .notNull()
     .references(() => abVariants.id, { onDelete: 'cascade' }),
   visitorId: varchar('visitor_id', { length: 255 }),
-  kiwifyOrderId: varchar('kiwify_order_id', { length: 255 }).notNull().unique(),
+  externalOrderId: varchar('external_order_id', { length: 255 }).notNull(),
+  source: varchar('source', { length: 20 }).notNull().default('kiwify'),
   amount: decimal('amount', { precision: 10, scale: 2 }).notNull().default('0'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (t) => [
   index('ab_conv_exp_idx').on(t.experimentId, t.variantId),
+  unique('ab_conversions_external_order_id_source_unique').on(t.externalOrderId, t.source),
 ])
 
 // Relations

@@ -91,7 +91,8 @@ export async function POST(request: NextRequest) {
     .values({
       experimentId: experiment.id,
       variantId: variant.id,
-      kiwifyOrderId: orderId,
+      externalOrderId: orderId,
+      source: 'kiwify',
       amount: String(amount),
     })
     .onConflictDoNothing()
