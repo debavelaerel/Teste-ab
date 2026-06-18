@@ -1,8 +1,18 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { Separator } from '@/components/ui/separator'
-import { SignOutButton } from '@/components/sign-out-button'
 import { requireOrgMember, AuthError } from '@/lib/require-org-member'
+import { SidebarNav } from '@/components/sidebar-nav'
+import { SignOutButton } from '@/components/sign-out-button'
+
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(w => w[0])
+    .join('')
+    .toUpperCase()
+}
 
 export default async function OrgLayout({
   children,
@@ -13,8 +23,11 @@ export default async function OrgLayout({
 }) {
   const { orgSlug } = await params
 
+  let session, org
   try {
-    await requireOrgMember(orgSlug)
+    const result = await requireOrgMember(orgSlug)
+    session = result.session
+    org = result.org
   } catch (e) {
     if (e instanceof AuthError) {
       redirect(e.status === 403 ? '/org' : '/login')
@@ -22,31 +35,40 @@ export default async function OrgLayout({
     throw e
   }
 
+  const orgInitials = getInitials(org.name)
+  const userDisplay = session.user.name ?? session.user.email ?? 'Usuário'
+  const userInitials = getInitials(userDisplay)
+
   return (
     <div className="flex min-h-screen">
-      <aside className="w-56 border-r bg-card flex flex-col gap-1 p-4 shrink-0">
-        <div className="mb-4">
-          <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-            A/B Testing
-          </span>
+      <aside className="w-64 border-r bg-card flex flex-col shrink-0">
+        {/* Org header */}
+        <div className="h-14 px-4 flex items-center gap-3 shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center shrink-0">
+            {orgInitials}
+          </div>
+          <span className="text-sm font-semibold truncate">{org.name}</span>
         </div>
-        <nav className="flex flex-col gap-1 flex-1">
-          <Link
-            href={`/org/${orgSlug}`}
-            className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent transition-colors"
-          >
-            Experimentos
-          </Link>
-          <Link
-            href={`/org/${orgSlug}/docs`}
-            className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent transition-colors"
-          >
-            Docs
-          </Link>
-        </nav>
-        <Separator className="my-2" />
-        <SignOutButton />
+
+        <Separator />
+
+        {/* Nav */}
+        <SidebarNav orgSlug={orgSlug} />
+
+        <div className="flex-1" />
+
+        <Separator />
+
+        {/* User footer */}
+        <div className="h-14 px-4 flex items-center gap-3 shrink-0">
+          <div className="w-7 h-7 rounded-full bg-muted text-muted-foreground text-xs font-semibold flex items-center justify-center shrink-0">
+            {userInitials}
+          </div>
+          <span className="text-xs text-muted-foreground truncate flex-1">{userDisplay}</span>
+          <SignOutButton />
+        </div>
       </aside>
+
       <main className="flex-1 p-8 overflow-auto">{children}</main>
     </div>
   )
