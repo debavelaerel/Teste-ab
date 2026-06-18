@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { eq, sql, count, sum, and } from 'drizzle-orm'
 import { db } from '@/db'
-import { abExperiments, abVariants, abVisits, abConversions } from '@/db/schema'
+import { abExperiments, abVisits, abConversions } from '@/db/schema'
 import { requireOrgMember, AuthError } from '@/lib/require-org-member'
 
 export async function GET(

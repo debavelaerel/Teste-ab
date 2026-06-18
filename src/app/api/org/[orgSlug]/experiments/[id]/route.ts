@@ -55,7 +55,7 @@ export async function PATCH(
       if (v.id) {
         await db.update(abVariants)
           .set({ name: v.name, url: v.url, weight: v.weight })
-          .where(eq(abVariants.id, v.id))
+          .where(and(eq(abVariants.id, v.id), eq(abVariants.experimentId, id)))
       }
     }
   }
