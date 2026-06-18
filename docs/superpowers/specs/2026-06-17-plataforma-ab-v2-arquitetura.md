@@ -196,7 +196,7 @@ ANTES:  /r/[expSlug]
 DEPOIS: /r/[orgSlug]/[expSlug]
 ```
 
-Exemplo: `/r/alexia/destrava-oab`
+Exemplo: `/r/alexia/meu-experimento` (slug definido pelo usuário ao criar o experimento)
 
 O slug do experimento é único **por org** — duas orgs podem usar o mesmo slug sem conflito.
 
@@ -221,7 +221,7 @@ DEPOIS: ?s1={orgSlug}:{expSlug}:{label}
 const colonFirst = s1.indexOf(':')
 const colonLast  = s1.lastIndexOf(':')
 const orgSlug  = s1.slice(0, colonFirst)          // "alexia"
-const expSlug  = s1.slice(colonFirst + 1, colonLast) // "destrava-oab"
+const expSlug  = s1.slice(colonFirst + 1, colonLast) // slug escolhido pelo usuário ao criar o experimento
 const label    = s1.slice(colonLast + 1).toUpperCase() // "A"
 ```
 

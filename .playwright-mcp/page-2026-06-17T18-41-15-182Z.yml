@@ -1,0 +1,27 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]: A/B Testing
+      - navigation [ref=e5]:
+        - link "Experimentos" [ref=e6] [cursor=pointer]:
+          - /url: /
+        - link "Docs" [ref=e7] [cursor=pointer]:
+          - /url: /docs
+      - separator [ref=e8]
+      - button "Sair" [ref=e9]
+    - main [ref=e10]:
+      - generic [ref=e11]:
+        - generic [ref=e12]:
+          - heading "Experimentos" [level=1] [ref=e13]
+          - link "+ Novo experimento" [ref=e14] [cursor=pointer]:
+            - /url: /experiments/new
+        - link "dddd Ativo /r/dddd 2 variantes" [ref=e17] [cursor=pointer]:
+          - /url: /experiments/dddd
+          - generic [ref=e18]:
+            - generic [ref=e19]: dddd
+            - generic [ref=e20]: Ativo
+            - code [ref=e21]: /r/dddd
+          - generic [ref=e22]: 2 variantes
+  - button "Open Next.js Dev Tools" [ref=e28] [cursor=pointer]:
+    - img [ref=e29]
+  - alert [ref=e32]

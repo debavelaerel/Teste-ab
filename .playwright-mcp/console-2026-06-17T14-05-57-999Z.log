@@ -1,0 +1,47 @@
+[    3771ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ http://localhost:3000/login:0
+[    4327ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[    4463ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1388805ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1389819ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1389854ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ http://localhost:3000/login:0
+[ 1389905ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 2150546ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 2151111ms] [LOG] [Fast Refresh] done in 666ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 4206149ms] Error: There are multiple relations between "abVariants" and "ab_experiments". Please specify relation name
+    at normalizeRelation (about://React/Server/file:///Users/lucasdebavelaere/code/teste-ab/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__0gdtykz._.js?3:11034:156)
+    at PgDialect.buildRelationalQueryWithoutPK (about://React/Server/file:///Users/lucasdebavelaere/code/teste-ab/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__0gdtykz._.js?4:12092:209)
+    at QueryPromise._getQuery (about://React/Server/file:///Users/lucasdebavelaere/code/teste-ab/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__0gdtykz._.js?5:14291:29)
+    at QueryPromise._toSQL (about://React/Server/file:///Users/lucasdebavelaere/code/teste-ab/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__0gdtykz._.js?6:14305:28)
+    at <anonymous> (about://React/Server/file:///Users/lucasdebavelaere/code/teste-ab/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__0gdtykz._.js?7:14277:48)
+    at Object.startActiveSpan (about://React/Server/file:///Users/lucasdebavelaere/code/teste-ab/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__0gdtykz._.js?8:7143:20)
+    at QueryPromise._prepare (about://React/Server/file:///Users/lucasdebavelaere/code/teste-ab/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__0gdtykz._.js?9:14276:164)
+    at <anonymous> (about://React/Server/file:///Users/lucasdebavelaere/code/teste-ab/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__0gdtykz._.js?10:14322:25)
+    at Object.startActiveSpan (about://React/Server/file:///Users/lucasdebavelaere/code/teste-ab/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__0gdtykz._.js?8:7143:20)
+    at QueryPromise.execute (about://React/Server/file:///Users/lucasdebavelaere/code/teste-ab/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__0gdtykz._.js?11:14321:164)
+    at QueryPromise.then (about://React/Server/file:///Users/lucasdebavelaere/code/teste-ab/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__0gdtykz._.js?12:6328:21)
+    at resolveErrorDev (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:1919:150)
+    at processFullStringRow (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:2434:29)
+    at processFullBinaryRow (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:2393:9)
+    at processBinaryChunk (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:2502:221)
+    at progress (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js:2689:13)
+[ 4206207ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 4206327ms] [LOG] [Fast Refresh] done in 222ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 4250448ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 4250676ms] [LOG] [Fast Refresh] done in 282ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 4251239ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 4251256ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 4442670ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 4443220ms] [LOG] [Fast Refresh] done in 651ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 4446975ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 4447217ms] [LOG] [Fast Refresh] done in 344ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 4488310ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 4488547ms] [LOG] [Fast Refresh] done in 337ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 4488686ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 4488898ms] [LOG] [Fast Refresh] done in 313ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 4497677ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 4497695ms] [LOG] [Fast Refresh] done in 119ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 6149127ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[11129509ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[11248262ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[11363143ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[11490064ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
