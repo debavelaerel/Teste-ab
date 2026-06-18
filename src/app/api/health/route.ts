@@ -7,9 +7,7 @@ export async function GET() {
     await db.execute(sql`SELECT 1`)
     return NextResponse.json({ ok: true, db: true })
   } catch (err) {
-    return NextResponse.json(
-      { ok: false, db: false, error: err instanceof Error ? err.message : String(err) },
-      { status: 500 }
-    )
+    console.error('[health] db check failed', err)
+    return NextResponse.json({ ok: false, db: false }, { status: 500 })
   }
 }
