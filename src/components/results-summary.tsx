@@ -54,15 +54,15 @@ export function ResultsSummary({ orgSlug, experimentId, experimentStatus, varian
       {/* Global summary */}
       <div className="grid grid-cols-3 gap-4">
         <Card className="p-4 text-center">
-          <p className="text-2xl font-bold">{totalVisits.toLocaleString('pt-BR')}</p>
+          <p className="text-2xl font-bold font-heading">{totalVisits.toLocaleString('pt-BR')}</p>
           <p className="text-xs text-muted-foreground mt-1">Visitas totais</p>
         </Card>
         <Card className="p-4 text-center">
-          <p className="text-2xl font-bold">{totalConversions.toLocaleString('pt-BR')}</p>
+          <p className="text-2xl font-bold font-heading">{totalConversions.toLocaleString('pt-BR')}</p>
           <p className="text-xs text-muted-foreground mt-1">Conversões totais</p>
         </Card>
         <Card className="p-4 text-center">
-          <p className="text-2xl font-bold">{fmtPct(globalRate)}</p>
+          <p className="text-2xl font-bold font-heading">{fmtPct(globalRate)}</p>
           <p className="text-xs text-muted-foreground mt-1">Taxa global</p>
         </Card>
       </div>
@@ -97,11 +97,10 @@ export function ResultsSummary({ orgSlug, experimentId, experimentStatus, varian
                   </div>
                 </div>
                 <div className="text-right flex flex-col items-end gap-1">
-                  <p className="text-xl font-bold">{fmtPct(v.rate)}</p>
+                  <p className="text-xl font-bold font-heading">{fmtPct(v.rate)}</p>
                   {confidence !== null && (
-                    <Badge variant={isSignificant ? 'default' : 'secondary'}>
-                      {Math.round(confidence * 100)}% confiança
-                      {isSignificant && isBetter ? ' 🏆' : ''}
+                    <Badge variant={isSignificant && isBetter ? 'finished' : isSignificant ? 'secondary' : 'secondary'}>
+                      {isSignificant && isBetter ? '↑ ' : ''}{Math.round(confidence * 100)}% confiança
                     </Badge>
                   )}
                   {confidence === null && i > 0 && (

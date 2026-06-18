@@ -92,7 +92,7 @@ export function ExperimentTabs({ orgSlug, experiment, variants, dailyData, appUr
     <div className="max-w-4xl">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <h1 className="text-2xl font-semibold">{experiment.name}</h1>
+        <h1 className="text-2xl font-bold font-heading">{experiment.name}</h1>
         <Badge variant={experiment.status as 'active' | 'paused' | 'finished'}>
           {STATUS_LABEL[experiment.status] ?? experiment.status}
         </Badge>
