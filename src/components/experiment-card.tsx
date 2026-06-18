@@ -37,12 +37,14 @@ export function ExperimentCard({ orgSlug, exp }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [stats, setStats] = useState<{ visits: number; conversions: number; rate: number } | null>(null)
   const [loadingStats, setLoadingStats] = useState(false)
+  const [fetchError, setFetchError] = useState(false)
 
   async function handleToggle() {
-    if (!expanded && stats === null) {
+    if (!expanded && stats === null && !loadingStats) {
       setLoadingStats(true)
       const res = await fetch(`/api/org/${orgSlug}/experiments/${exp.id}/stats`)
       if (res.ok) setStats(await res.json())
+      else setFetchError(true)
       setLoadingStats(false)
     }
     setExpanded(v => !v)
@@ -94,6 +96,10 @@ export function ExperimentCard({ orgSlug, exp }: Props) {
             {loadingStats ? (
               <div className="col-span-3 text-center text-sm text-muted-foreground py-2">
                 Carregando...
+              </div>
+            ) : fetchError ? (
+              <div className="col-span-3 text-center text-sm text-destructive py-2">
+                Erro ao carregar dados
               </div>
             ) : stats ? (
               <>
