@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import crypto from 'crypto'
 import { db } from '@/db'
-import { abExperiments, abConversions } from '@/db/schema'
+import { abExperiments, abOrganizations, abVariants, abConversions } from '@/db/schema'
 
 function verifySignature(body: string, signature: string, secret: string): boolean {
-  if (!secret) return process.env.NODE_ENV !== 'production' // Only skip in dev when unconfigured
+  if (!secret) return process.env.NODE_ENV !== 'production'
   const expected = crypto.createHmac('sha256', secret).update(body).digest('hex')
   try {
     return crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(signature, 'hex'))
@@ -27,11 +27,9 @@ export async function POST(request: NextRequest) {
   try {
     payload = JSON.parse(body)
   } catch {
-    // Always return 200 to prevent Kiwify retry storms
     return NextResponse.json({ ok: true, reason: 'invalid json' })
   }
 
-  // Only process paid orders
   if (payload['event'] !== 'order.paid') {
     return NextResponse.json({ ok: true, skipped: true })
   }
@@ -42,29 +40,51 @@ export async function POST(request: NextRequest) {
   const s1 = tracker?.['s1'] as string | undefined
   const amount = (order?.['product'] as Record<string, unknown> | undefined)?.['price'] ?? '0'
 
-  // Always return 200 to prevent Kiwify retry storms
-  if (!orderId || !s1 || !s1.includes(':')) {
+  if (!orderId || !s1) {
     return NextResponse.json({ ok: true, reason: 'not trackable' })
   }
 
-  // Use lastIndexOf to split slug from label (slug can contain colons, label never does)
-  const colonIdx = s1.lastIndexOf(':')
-  const slug = s1.slice(0, colonIdx)
-  const label = s1.slice(colonIdx + 1).toUpperCase()
+  // s1 format: orgSlug:expSlug:label (exactly 3 parts)
+  const colonFirst = s1.indexOf(':')
+  const colonLast = s1.lastIndexOf(':')
 
-  const experiment = await db.query.abExperiments.findFirst({
-    where: eq(abExperiments.slug, slug),
-    with: { variants: true },
-  })
-
-  if (!experiment) {
-    return NextResponse.json({ ok: true, reason: 'experiment not found' })
+  if (colonFirst === -1 || colonFirst === colonLast) {
+    return NextResponse.json({ ok: true, reason: 'invalid s1 format' })
   }
 
-  const variant = experiment.variants.find(v => v.label === label)
-  if (!variant) {
-    return NextResponse.json({ ok: true, reason: 'variant not found' })
+  const orgSlug = s1.slice(0, colonFirst)
+  const expSlug = s1.slice(colonFirst + 1, colonLast)
+  const label = s1.slice(colonLast + 1).toUpperCase()
+
+  if (!orgSlug || !expSlug || !label) {
+    return NextResponse.json({ ok: true, reason: 'empty s1 parts' })
   }
+
+  // Find experiment + variant in one query
+  const rows = await db
+    .select({ experiment: abExperiments, variant: abVariants })
+    .from(abExperiments)
+    .innerJoin(abOrganizations, eq(abExperiments.orgId, abOrganizations.id))
+    .innerJoin(
+      abVariants,
+      and(
+        eq(abVariants.experimentId, abExperiments.id),
+        eq(abVariants.label, label)
+      )
+    )
+    .where(
+      and(
+        eq(abOrganizations.slug, orgSlug),
+        eq(abExperiments.slug, expSlug)
+      )
+    )
+    .limit(1)
+
+  if (rows.length === 0) {
+    return NextResponse.json({ ok: true, reason: 'experiment or variant not found' })
+  }
+
+  const { experiment, variant } = rows[0]
 
   await db
     .insert(abConversions)
