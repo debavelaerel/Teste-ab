@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
   try {
     payload = JSON.parse(body)
   } catch {
+    console.warn('[webhook:kiwify] skipped', { reason: 'invalid json' })
     return NextResponse.json({ ok: true, reason: 'invalid json' })
   }
 
@@ -41,14 +42,15 @@ export async function POST(request: NextRequest) {
   const amount = (order?.['product'] as Record<string, unknown> | undefined)?.['price'] ?? '0'
 
   if (!orderId || !s1) {
+    console.warn('[webhook:kiwify] skipped', { reason: 'not trackable', orderId })
     return NextResponse.json({ ok: true, reason: 'not trackable' })
   }
 
-  // s1 format: orgSlug:expSlug:label (exactly 3 parts)
   const colonFirst = s1.indexOf(':')
   const colonLast = s1.lastIndexOf(':')
 
   if (colonFirst === -1 || colonFirst === colonLast) {
+    console.warn('[webhook:kiwify] skipped', { reason: 'invalid s1 format', s1 })
     return NextResponse.json({ ok: true, reason: 'invalid s1 format' })
   }
 
@@ -57,45 +59,55 @@ export async function POST(request: NextRequest) {
   const label = s1.slice(colonLast + 1).toUpperCase()
 
   if (!orgSlug || !expSlug || !label) {
+    console.warn('[webhook:kiwify] skipped', { reason: 'empty s1 parts', s1 })
     return NextResponse.json({ ok: true, reason: 'empty s1 parts' })
   }
 
-  // Find experiment + variant in one query
-  const rows = await db
-    .select({ experiment: abExperiments, variant: abVariants })
-    .from(abExperiments)
-    .innerJoin(abOrganizations, eq(abExperiments.orgId, abOrganizations.id))
-    .innerJoin(
-      abVariants,
-      and(
-        eq(abVariants.experimentId, abExperiments.id),
-        eq(abVariants.label, label)
+  try {
+    const rows = await db
+      .select({ experiment: abExperiments, variant: abVariants })
+      .from(abExperiments)
+      .innerJoin(abOrganizations, eq(abExperiments.orgId, abOrganizations.id))
+      .innerJoin(
+        abVariants,
+        and(
+          eq(abVariants.experimentId, abExperiments.id),
+          eq(abVariants.label, label)
+        )
       )
-    )
-    .where(
-      and(
-        eq(abOrganizations.slug, orgSlug),
-        eq(abExperiments.slug, expSlug)
+      .where(
+        and(
+          eq(abOrganizations.slug, orgSlug),
+          eq(abExperiments.slug, expSlug)
+        )
       )
-    )
-    .limit(1)
+      .limit(1)
 
-  if (rows.length === 0) {
-    return NextResponse.json({ ok: true, reason: 'experiment or variant not found' })
-  }
+    if (rows.length === 0) {
+      console.warn('[webhook:kiwify] skipped', { reason: 'experiment not found', orgSlug, expSlug, label })
+      return NextResponse.json({ ok: true, reason: 'experiment or variant not found' })
+    }
 
-  const { experiment, variant } = rows[0]
+    const { experiment, variant } = rows[0]
 
-  await db
-    .insert(abConversions)
-    .values({
-      experimentId: experiment.id,
-      variantId: variant.id,
-      externalOrderId: orderId,
-      source: 'kiwify',
-      amount: String(amount),
+    await db
+      .insert(abConversions)
+      .values({
+        experimentId: experiment.id,
+        variantId: variant.id,
+        externalOrderId: orderId,
+        source: 'kiwify',
+        amount: String(amount),
+      })
+      .onConflictDoNothing()
+
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    console.error('[webhook:kiwify]', {
+      orderId,
+      s1,
+      error: err instanceof Error ? err.message : String(err),
     })
-    .onConflictDoNothing()
-
-  return NextResponse.json({ ok: true })
+    return NextResponse.json({ ok: false, error: 'internal error' }, { status: 500 })
+  }
 }

@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
   try {
     payload = JSON.parse(body)
   } catch {
+    console.warn('[webhook:hotmart] skipped', { reason: 'invalid json' })
     return NextResponse.json({ ok: true, reason: 'invalid json' })
   }
 
@@ -44,14 +45,15 @@ export async function POST(request: NextRequest) {
   const amount = priceObj?.['value'] ?? 0
 
   if (!transactionId || !trackerToken) {
+    console.warn('[webhook:hotmart] skipped', { reason: 'not trackable', transactionId })
     return NextResponse.json({ ok: true, reason: 'not trackable' })
   }
 
-  // Format: orgSlug:expSlug:label (exactly 3 parts)
   const colonFirst = trackerToken.indexOf(':')
   const colonLast = trackerToken.lastIndexOf(':')
 
   if (colonFirst === -1 || colonFirst === colonLast) {
+    console.warn('[webhook:hotmart] skipped', { reason: 'invalid tracker_token format', trackerToken })
     return NextResponse.json({ ok: true, reason: 'invalid tracker_token format' })
   }
 
@@ -60,44 +62,55 @@ export async function POST(request: NextRequest) {
   const label = trackerToken.slice(colonLast + 1).toUpperCase()
 
   if (!orgSlug || !expSlug || !label) {
+    console.warn('[webhook:hotmart] skipped', { reason: 'empty tracker_token parts', trackerToken })
     return NextResponse.json({ ok: true, reason: 'empty tracker_token parts' })
   }
 
-  const rows = await db
-    .select({ experiment: abExperiments, variant: abVariants })
-    .from(abExperiments)
-    .innerJoin(abOrganizations, eq(abExperiments.orgId, abOrganizations.id))
-    .innerJoin(
-      abVariants,
-      and(
-        eq(abVariants.experimentId, abExperiments.id),
-        eq(abVariants.label, label)
+  try {
+    const rows = await db
+      .select({ experiment: abExperiments, variant: abVariants })
+      .from(abExperiments)
+      .innerJoin(abOrganizations, eq(abExperiments.orgId, abOrganizations.id))
+      .innerJoin(
+        abVariants,
+        and(
+          eq(abVariants.experimentId, abExperiments.id),
+          eq(abVariants.label, label)
+        )
       )
-    )
-    .where(
-      and(
-        eq(abOrganizations.slug, orgSlug),
-        eq(abExperiments.slug, expSlug)
+      .where(
+        and(
+          eq(abOrganizations.slug, orgSlug),
+          eq(abExperiments.slug, expSlug)
+        )
       )
-    )
-    .limit(1)
+      .limit(1)
 
-  if (rows.length === 0) {
-    return NextResponse.json({ ok: true, reason: 'experiment or variant not found' })
-  }
+    if (rows.length === 0) {
+      console.warn('[webhook:hotmart] skipped', { reason: 'experiment not found', orgSlug, expSlug, label })
+      return NextResponse.json({ ok: true, reason: 'experiment or variant not found' })
+    }
 
-  const { experiment, variant } = rows[0]
+    const { experiment, variant } = rows[0]
 
-  await db
-    .insert(abConversions)
-    .values({
-      experimentId: experiment.id,
-      variantId: variant.id,
-      externalOrderId: transactionId,
-      source: 'hotmart',
-      amount: String(amount),
+    await db
+      .insert(abConversions)
+      .values({
+        experimentId: experiment.id,
+        variantId: variant.id,
+        externalOrderId: transactionId,
+        source: 'hotmart',
+        amount: String(amount),
+      })
+      .onConflictDoNothing()
+
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    console.error('[webhook:hotmart]', {
+      transactionId,
+      trackerToken,
+      error: err instanceof Error ? err.message : String(err),
     })
-    .onConflictDoNothing()
-
-  return NextResponse.json({ ok: true })
+    return NextResponse.json({ ok: false, error: 'internal error' }, { status: 500 })
+  }
 }
