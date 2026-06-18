@@ -31,12 +31,31 @@ export default async function DocsPage({
       </section>
 
       <section className="space-y-3">
+        <h2 className="text-base font-semibold">1b · Instalar o tracker Hotmart (se usar Hotmart)</h2>
+        <p className="text-muted-foreground">Para experimentos com checkout Hotmart, use este script em vez do tracker.js:</p>
+        <pre className="bg-muted rounded-md p-3 text-xs overflow-x-auto whitespace-pre-wrap">
+{`<script src="${appUrl}/tracker-hotmart.js"></script>`}
+        </pre>
+        <p className="text-muted-foreground text-xs">O script injeta o parâmetro <code className="bg-muted px-1 rounded">xcod</code> nos links <code className="bg-muted px-1 rounded">pay.hotmart.com</code>. Use apenas um tracker por landing page.</p>
+      </section>
+
+      <section className="space-y-3">
         <h2 className="text-base font-semibold">2 · Configurar webhook na Kiwify</h2>
         <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
           <li>Acesse o painel da Kiwify → Configurações → Webhooks</li>
           <li>Adicione a URL: <code className="bg-muted px-1 rounded">{appUrl}/api/webhook/kiwify</code></li>
           <li>Evento: <strong>order.paid</strong></li>
           <li>Copie o token gerado e adicione como <code className="bg-muted px-1 rounded">KIWIFY_WEBHOOK_SECRET</code> nas variáveis de ambiente</li>
+        </ol>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-base font-semibold">2b · Configurar webhook na Hotmart</h2>
+        <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+          <li>Acesse o painel da Hotmart → Ferramentas → Webhooks</li>
+          <li>Adicione a URL: <code className="bg-muted px-1 rounded">{appUrl}/api/webhook/hotmart</code></li>
+          <li>Evento: <strong>PURCHASE_APPROVED</strong></li>
+          <li>Copie o token gerado e adicione como <code className="bg-muted px-1 rounded">HOTMART_WEBHOOK_TOKEN</code> nas variáveis de ambiente</li>
         </ol>
       </section>
 

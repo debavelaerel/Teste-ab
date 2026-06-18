@@ -45,7 +45,9 @@ export default async function ExperimentConfigPage({
       <div className="mb-6">
         <p className="text-sm font-medium mb-2">Script para instalar na landing page:</p>
         <pre className="bg-muted rounded-md p-3 text-xs overflow-x-auto">
-{`<script src="${appUrl}/tracker.js"></script>`}
+{experiment.checkoutType === 'hotmart'
+  ? `<script src="${appUrl}/tracker-hotmart.js"></script>`
+  : `<script src="${appUrl}/tracker.js"></script>`}
         </pre>
       </div>
 
@@ -55,6 +57,7 @@ export default async function ExperimentConfigPage({
         initialName={experiment.name}
         initialSlug={experiment.slug}
         initialCookieDays={experiment.cookieDays}
+        initialCheckoutType={experiment.checkoutType as 'kiwify' | 'hotmart'}
         initialVariants={experiment.variants.map(v => ({
           id: v.id,
           name: v.name,
