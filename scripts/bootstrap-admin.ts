@@ -38,13 +38,18 @@ const adminEmail: string = email
 const adminPassword: string = password
 
 async function createUser(adminEmail: string, adminPassword: string): Promise<void> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/api/auth/sign-up/email`, {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  const res = await fetch(`${appUrl}/api/auth/sign-up/email`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Origin': appUrl },
     body: JSON.stringify({ email: adminEmail, password: adminPassword, name: adminEmail.split('@')[0] }),
   })
   if (!res.ok) {
     const body = await res.text()
+    if (res.status === 422 && body.includes('USER_ALREADY_EXISTS')) {
+      console.log('     ✓ Usuário já existe, continuando...')
+      return
+    }
     throw new Error(`Falha ao criar usuário via Better Auth API: ${res.status} ${body}`)
   }
 }
