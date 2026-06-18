@@ -9,7 +9,8 @@ export function proxy(request: NextRequest) {
   const isPublic =
     pathname.startsWith('/login') ||
     pathname.startsWith('/r/') ||
-    pathname === '/tracker.js'
+    pathname === '/tracker.js' ||
+    pathname === '/tracker-hotmart.js'
 
   if (!isPublic && !session) {
     return NextResponse.redirect(new URL('/login', request.url))

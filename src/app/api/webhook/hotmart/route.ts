@@ -5,7 +5,7 @@ import { db } from '@/db'
 import { abExperiments, abOrganizations, abVariants, abConversions } from '@/db/schema'
 
 function verifyToken(received: string, expected: string): boolean {
-  if (!expected) return process.env.NODE_ENV !== 'production'
+  if (!expected) return false
   try {
     const r = Buffer.from(received)
     const e = Buffer.from(expected)

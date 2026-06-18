@@ -16,7 +16,9 @@ export default async function OrgLayout({
   try {
     await requireOrgMember(orgSlug)
   } catch (e) {
-    if (e instanceof AuthError) redirect('/login')
+    if (e instanceof AuthError) {
+      redirect(e.status === 403 ? '/org' : '/login')
+    }
     throw e
   }
 
