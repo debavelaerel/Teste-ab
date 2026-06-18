@@ -97,15 +97,18 @@ try {
 }
 ```
 
-Logar também os `reason` de descarte como `console.warn`:
+Logar também os `reason` de descarte — incluindo os guards de formato que já existem — como `console.warn`:
 
 ```typescript
+// Guards existentes de formato inválido devem incluir warn:
+console.warn('[webhook:kiwify] skipped', { reason: 'invalid s1 format', s1 })
 console.warn('[webhook:kiwify] skipped', { reason: 'not trackable', orderId })
+console.warn('[webhook:kiwify] skipped', { reason: 'experiment not found', orgSlug, expSlug, label })
 ```
 
 ### Hotmart (`src/app/api/webhook/hotmart/route.ts`)
 
-Mesma estrutura com prefixo `[webhook:hotmart]` e campos `{ transactionId, trackerToken }`.
+Mesma estrutura com prefixo `[webhook:hotmart]` e campos `{ transactionId, trackerToken }`. Guards de formato também recebem `console.warn`.
 
 ### Convenção de prefixos
 
@@ -139,16 +142,19 @@ Feito pelo dashboard UptimeRobot — sem código. Requer apenas que `/api/health
 
 ### SDK
 
-`@sentry/nextjs` — integração oficial para Next.js App Router.
+`@sentry/nextjs` — integração oficial para Next.js App Router. Instalar antes de qualquer outra etapa:
 
-### Arquivos criados pelo wizard (ou manualmente)
+```bash
+npm install @sentry/nextjs
+```
+
+### Arquivos criados
 
 | Arquivo | Descrição |
 |---|---|
 | `src/instrumentation.ts` | Entry point de instrumentação Next.js — inicializa Sentry no server |
 | `sentry.client.config.ts` | Config do SDK no browser |
 | `sentry.server.config.ts` | Config do SDK no server (Node.js) |
-| `sentry.edge.config.ts` | Config do SDK no edge runtime |
 
 ### Configuração base (`sentry.server.config.ts` e equivalentes)
 
@@ -170,10 +176,16 @@ export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     await import('../sentry.server.config')
   }
-  if (process.env.NEXT_RUNTIME === 'edge') {
-    await import('../sentry.edge.config')
-  }
 }
+
+export const onRequestError = Sentry.captureRequestError
+```
+
+O export `onRequestError` é necessário para capturar erros de rotas de API que fazem `try/catch` e retornam 500 — sem ele, o Sentry só captura exceções não tratadas, perdendo os erros dos webhooks.
+
+`Sentry` deve ser importado no topo do arquivo:
+```typescript
+import * as Sentry from '@sentry/nextjs'
 ```
 
 ### `next.config.ts` — wrapper Sentry
@@ -227,6 +239,7 @@ Configurar via dashboard (sem código):
 ## 7. Sequência de Setup (fora do código)
 
 1. Criar conta Sentry → criar projeto Next.js → copiar DSN
+   **Antes disso, no código:** `npm install @sentry/nextjs`
 2. Criar projeto Railway + adicionar plugin PostgreSQL
 3. Conectar repositório GitHub ao Railway
 4. Configurar todas as variáveis de ambiente no Railway dashboard
@@ -246,8 +259,7 @@ Configurar via dashboard (sem código):
 | `src/app/api/health/route.ts` | Criar | Health check com teste de DB |
 | `src/app/api/webhook/kiwify/route.ts` | Modificar | try/catch + console.error/warn |
 | `src/app/api/webhook/hotmart/route.ts` | Modificar | try/catch + console.error/warn |
-| `src/instrumentation.ts` | Criar | Inicialização Sentry no Next.js |
+| `src/instrumentation.ts` | Criar | Inicialização Sentry + `onRequestError` hook |
 | `sentry.client.config.ts` | Criar | Config Sentry browser |
 | `sentry.server.config.ts` | Criar | Config Sentry server |
-| `sentry.edge.config.ts` | Criar | Config Sentry edge |
 | `next.config.ts` | Modificar | Wrap com `withSentryConfig` |
