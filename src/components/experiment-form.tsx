@@ -19,6 +19,7 @@ interface Props {
   initialName?: string
   initialSlug?: string
   initialCookieDays?: number
+  initialCheckoutType?: 'kiwify' | 'hotmart'
   initialVariants?: VariantRow[]
 }
 
@@ -28,6 +29,7 @@ export function ExperimentForm({
   initialName = '',
   initialSlug = '',
   initialCookieDays = 30,
+  initialCheckoutType = 'kiwify',
   initialVariants = [
     { name: 'Controle', url: '', weight: 50 },
     { name: 'Teste B', url: '', weight: 50 },
@@ -37,6 +39,7 @@ export function ExperimentForm({
   const [name, setName] = useState(initialName)
   const [slug, setSlug] = useState(initialSlug)
   const [cookieDays, setCookieDays] = useState(initialCookieDays)
+  const [checkoutType, setCheckoutType] = useState<'kiwify' | 'hotmart'>(initialCheckoutType)
   const [variants, setVariants] = useState<VariantRow[]>(initialVariants)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -79,7 +82,7 @@ export function ExperimentForm({
     setLoading(true)
     setError('')
 
-    const payload = { name, slug, cookieDays, variants }
+    const payload = { name, slug, cookieDays, checkoutType, variants }
     const url = experimentId
       ? `/api/org/${orgSlug}/experiments/${experimentId}`
       : `/api/org/${orgSlug}/experiments`
@@ -140,6 +143,28 @@ export function ExperimentForm({
           min={1}
           max={365}
         />
+      </div>
+
+      <div className="space-y-1 max-w-xs">
+        <Label>Checkout</Label>
+        <div className="flex gap-4 pt-1">
+          {(['kiwify', 'hotmart'] as const).map((opt) => (
+            <label key={opt} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="checkoutType"
+                value={opt}
+                checked={checkoutType === opt}
+                onChange={() => setCheckoutType(opt)}
+                disabled={!!experimentId}
+              />
+              <span className="text-sm capitalize">{opt}</span>
+            </label>
+          ))}
+        </div>
+        {!!experimentId && (
+          <p className="text-xs text-muted-foreground">O checkout não pode ser alterado após a criação</p>
+        )}
       </div>
 
       <div>

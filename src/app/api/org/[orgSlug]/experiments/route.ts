@@ -20,10 +20,11 @@ export async function POST(
   }
 
   const body = await request.json()
-  const { name, slug, cookieDays = 30, variants } = body as {
+  const { name, slug, cookieDays = 30, checkoutType = 'kiwify', variants } = body as {
     name: string
     slug: string
     cookieDays?: number
+    checkoutType?: 'kiwify' | 'hotmart'
     variants: { name: string; url: string; weight: number }[]
   }
 
@@ -41,6 +42,7 @@ export async function POST(
     name,
     slug,
     cookieDays,
+    checkoutType,
   }).returning()
 
   await db.insert(abVariants).values(

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, count } from 'drizzle-orm'
 import { db } from '@/db'
-import { abExperiments, abVariants } from '@/db/schema'
+import { abExperiments, abVariants, abConversions } from '@/db/schema'
 import { requireOrgMember, AuthError } from '@/lib/require-org-member'
 
 export async function PATCH(
@@ -24,6 +24,24 @@ export async function PATCH(
   if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const body = await request.json()
+
+  // Guard: block checkoutType change if conversions already exist
+  if (body.checkoutType !== undefined && body.checkoutType !== existing.checkoutType) {
+    const [{ convCount }] = await db
+      .select({ convCount: count() })
+      .from(abConversions)
+      .where(eq(abConversions.experimentId, id))
+    if (Number(convCount) > 0) {
+      return NextResponse.json(
+        { error: 'Não é possível alterar o checkout após registrar conversões' },
+        { status: 409 }
+      )
+    }
+    await db.update(abExperiments)
+      .set({ checkoutType: body.checkoutType })
+      .where(and(eq(abExperiments.id, id), eq(abExperiments.orgId, org.id)))
+    return NextResponse.json({ ok: true })
+  }
 
   if (body.status !== undefined) {
     const update: Partial<typeof abExperiments.$inferInsert> = { status: body.status }
