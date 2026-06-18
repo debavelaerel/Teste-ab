@@ -18,12 +18,13 @@ interface VariantResult {
 }
 
 interface Props {
+  orgSlug: string
   experimentId: string
   experimentStatus: string
   variants: VariantResult[]
 }
 
-export function ResultsSummary({ experimentId, experimentStatus, variants }: Props) {
+export function ResultsSummary({ orgSlug, experimentId, experimentStatus, variants }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
 
@@ -31,7 +32,7 @@ export function ResultsSummary({ experimentId, experimentStatus, variants }: Pro
 
   async function updateStatus(status: string, winnerVariantId?: string) {
     setLoading(status)
-    await fetch(`/api/experiments/${experimentId}`, {
+    await fetch(`/api/org/${orgSlug}/experiments/${experimentId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status, winnerVariantId }),

@@ -16,6 +16,19 @@ export default async function OrgRootPage() {
     .where(eq(abMemberships.userId, session.user.id))
     .limit(1)
 
-  if (rows.length === 0) redirect('/login')
+  if (rows.length === 0) {
+    // User has a session but belongs to no org — avoid redirect loop with proxy.ts
+    // (proxy would send /login back to /org creating an infinite loop)
+    return (
+      <div className="flex min-h-screen items-center justify-center text-center p-8">
+        <div>
+          <h1 className="text-xl font-semibold mb-2">Sem acesso</h1>
+          <p className="text-sm text-muted-foreground">
+            Sua conta não está associada a nenhuma organização. Entre em contato com o administrador.
+          </p>
+        </div>
+      </div>
+    )
+  }
   redirect(`/org/${rows[0].org.slug}`)
 }

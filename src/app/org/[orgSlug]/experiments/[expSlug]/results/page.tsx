@@ -76,7 +76,7 @@ export default async function ResultsPage({
           </Link>
         </div>
       </div>
-      <ResultsSummary experimentId={experiment.id} experimentStatus={experiment.status} variants={variants} />
+      <ResultsSummary orgSlug={orgSlug} experimentId={experiment.id} experimentStatus={experiment.status} variants={variants} />
       <div>
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
           Evolução diária — Taxa de conversão
