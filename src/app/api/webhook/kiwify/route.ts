@@ -5,7 +5,7 @@ import { db } from '@/db'
 import { abExperiments, abOrganizations, abVariants, abConversions } from '@/db/schema'
 
 function verifySignature(body: string, signature: string, secret: string): boolean {
-  if (!secret) return process.env.NODE_ENV !== 'production'
+  if (!secret) return false
   const expected = crypto.createHmac('sha256', secret).update(body).digest('hex')
   try {
     return crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(signature, 'hex'))

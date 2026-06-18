@@ -42,10 +42,15 @@ export function ExperimentCard({ orgSlug, exp }: Props) {
   async function handleToggle() {
     if (!expanded && stats === null && !loadingStats) {
       setLoadingStats(true)
-      const res = await fetch(`/api/org/${orgSlug}/experiments/${exp.id}/stats`)
-      if (res.ok) setStats(await res.json())
-      else setFetchError(true)
-      setLoadingStats(false)
+      try {
+        const res = await fetch(`/api/org/${orgSlug}/experiments/${exp.id}/stats`)
+        if (res.ok) setStats(await res.json())
+        else setFetchError(true)
+      } catch {
+        setFetchError(true)
+      } finally {
+        setLoadingStats(false)
+      }
     }
     setExpanded(v => !v)
   }

@@ -32,6 +32,15 @@ export async function POST(
     return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
   }
 
+  for (const v of variants) {
+    try {
+      const u = new URL(v.url)
+      if (u.protocol !== 'https:' && u.protocol !== 'http:') throw new Error()
+    } catch {
+      return NextResponse.json({ error: 'URLs de variantes devem usar http:// ou https://' }, { status: 400 })
+    }
+  }
+
   const totalWeight = variants.reduce((s, v) => s + v.weight, 0)
   if (totalWeight !== 100) {
     return NextResponse.json({ error: 'Weights must sum to 100' }, { status: 400 })

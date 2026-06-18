@@ -83,7 +83,19 @@ export async function GET(
       .onConflictDoNothing()
   }
 
-  const destUrl = new URL(variant.url)
+  let destUrl: URL
+  try {
+    destUrl = new URL(variant.url)
+  } catch {
+    const res = NextResponse.redirect(new URL('/', request.url), { status: 302 })
+    res.headers.set('Cache-Control', 'no-store')
+    return res
+  }
+  if (destUrl.protocol !== 'https:' && destUrl.protocol !== 'http:') {
+    const res = NextResponse.redirect(new URL('/', request.url), { status: 302 })
+    res.headers.set('Cache-Control', 'no-store')
+    return res
+  }
   destUrl.searchParams.set('s1', `${orgSlug}:${expSlug}:${variant.label}`)
 
   const response = NextResponse.redirect(destUrl.toString(), { status: 302 })

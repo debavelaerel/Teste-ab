@@ -40,7 +40,7 @@ export async function PATCH(
     await db.update(abExperiments)
       .set({ checkoutType: body.checkoutType })
       .where(and(eq(abExperiments.id, id), eq(abExperiments.orgId, org.id)))
-    return NextResponse.json({ ok: true })
+    // Do not return early — other fields in the same request continue below
   }
 
   if (body.status !== undefined) {
@@ -69,6 +69,17 @@ export async function PATCH(
   }
 
   if (variants) {
+    for (const v of variants) {
+      if (v.url !== undefined) {
+        try {
+          const u = new URL(v.url)
+          if (u.protocol !== 'https:' && u.protocol !== 'http:')
+            return NextResponse.json({ error: 'URLs de variantes devem usar http:// ou https://' }, { status: 400 })
+        } catch {
+          return NextResponse.json({ error: 'URL de variante inválida' }, { status: 400 })
+        }
+      }
+    }
     for (const v of variants) {
       if (v.id) {
         await db.update(abVariants)
