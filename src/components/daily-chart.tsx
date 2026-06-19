@@ -17,7 +17,7 @@ function formatRate(value: unknown) {
 export function DailyChart({ data, variants }: Props) {
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
+      <div className="flex items-center justify-center h-40 text-zinc-400 text-sm">
         Sem dados ainda
       </div>
     )
@@ -26,11 +26,14 @@ export function DailyChart({ data, variants }: Props) {
   return (
     <ResponsiveContainer width="100%" height={240}>
       <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-        <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-        <YAxis tickFormatter={v => (v * 100).toFixed(0) + '%'} tick={{ fontSize: 11 }} />
-        <Tooltip formatter={formatRate} />
-        <Legend />
+        <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" />
+        <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#a1a1aa', fontFamily: 'var(--font-geist-mono)' }} axisLine={false} tickLine={false} />
+        <YAxis tickFormatter={v => (v * 100).toFixed(0) + '%'} tick={{ fontSize: 11, fill: '#a1a1aa', fontFamily: 'var(--font-geist-mono)' }} axisLine={false} tickLine={false} />
+        <Tooltip
+          formatter={formatRate}
+          contentStyle={{ borderRadius: 8, border: '1px solid #f0f0f0', boxShadow: '0 4px 12px rgba(0,0,0,.06)', fontFamily: 'var(--font-geist-sans)', fontSize: 12 }}
+        />
+        <Legend wrapperStyle={{ fontSize: 12, fontFamily: 'var(--font-geist-sans)' }} />
         {variants.map(v => (
           <Line
             key={v.label}

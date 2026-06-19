@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { calcConfidence, fmtPct } from '@/lib/stats'
@@ -53,18 +52,18 @@ export function ResultsSummary({ orgSlug, experimentId, experimentStatus, varian
     <div className="space-y-6">
       {/* Global summary */}
       <div className="grid grid-cols-3 gap-4">
-        <Card className="p-4 text-center">
-          <p className="text-2xl font-bold font-heading">{totalVisits.toLocaleString('pt-BR')}</p>
-          <p className="text-xs text-muted-foreground mt-1">Visitas totais</p>
-        </Card>
-        <Card className="p-4 text-center">
-          <p className="text-2xl font-bold font-heading">{totalConversions.toLocaleString('pt-BR')}</p>
-          <p className="text-xs text-muted-foreground mt-1">Conversões totais</p>
-        </Card>
-        <Card className="p-4 text-center">
-          <p className="text-2xl font-bold font-heading">{fmtPct(globalRate)}</p>
-          <p className="text-xs text-muted-foreground mt-1">Taxa global</p>
-        </Card>
+        <div className="rounded-xl border border-zinc-100 bg-white p-4 text-center">
+          <p className="text-2xl font-bold text-zinc-900 font-mono">{totalVisits.toLocaleString('pt-BR')}</p>
+          <p className="text-xs text-zinc-400 mt-1">Visitas totais</p>
+        </div>
+        <div className="rounded-xl border border-zinc-100 bg-white p-4 text-center">
+          <p className="text-2xl font-bold text-zinc-900 font-mono">{totalConversions.toLocaleString('pt-BR')}</p>
+          <p className="text-xs text-zinc-400 mt-1">Conversões totais</p>
+        </div>
+        <div className="rounded-xl border border-zinc-100 bg-white p-4 text-center">
+          <p className="text-2xl font-bold text-zinc-900 font-mono">{fmtPct(globalRate)}</p>
+          <p className="text-xs text-zinc-400 mt-1">Taxa global</p>
+        </div>
       </div>
 
       {/* Per-variant cards */}
@@ -77,39 +76,34 @@ export function ResultsSummary({ orgSlug, experimentId, experimentStatus, varian
           const isBetter = v.rate > control.rate
 
           return (
-            <Card key={v.id} className="p-4">
+            <div key={v.id} className="rounded-xl border border-zinc-100 bg-white p-4">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <span
-                    className="w-3 h-3 rounded-full shrink-0"
-                    style={{ backgroundColor: v.color }}
-                  />
+                  <span className="w-2.5 h-2.5 rounded-full shrink-0 mt-0.5" style={{ backgroundColor: v.color }} />
                   <div>
-                    <p className="font-medium">
+                    <p className="font-semibold text-zinc-900 text-sm">
                       {v.label} — {v.name}
-                      {i === 0 && (
-                        <span className="ml-2 text-xs text-muted-foreground">(controle)</span>
-                      )}
+                      {i === 0 && <span className="ml-2 text-xs text-zinc-400 font-normal">(controle)</span>}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
+                    <p className="text-xs text-zinc-400 mt-0.5">
                       {v.visits} visitas · {v.conversions} conversões
                     </p>
                   </div>
                 </div>
                 <div className="text-right flex flex-col items-end gap-1">
-                  <p className="text-xl font-bold font-heading">{fmtPct(v.rate)}</p>
+                  <p className="text-xl font-bold text-zinc-900 font-mono">{fmtPct(v.rate)}</p>
                   {confidence !== null && (
-                    <Badge variant={isSignificant && isBetter ? 'finished' : isSignificant ? 'secondary' : 'secondary'}>
+                    <Badge variant={isSignificant && isBetter ? 'active' : 'outline'}>
                       {isSignificant && isBetter ? '↑ ' : ''}{Math.round(confidence * 100)}% confiança
                     </Badge>
                   )}
                   {confidence === null && i > 0 && (
-                    <span className="text-xs text-muted-foreground">dados insuficientes</span>
+                    <span className="text-xs text-zinc-400">dados insuficientes</span>
                   )}
                 </div>
               </div>
               {experimentStatus === 'active' && isSignificant && (
-                <div className="mt-3 pt-3 border-t flex justify-end">
+                <div className="mt-3 pt-3 border-t border-zinc-100 flex justify-end">
                   <Button
                     size="sm"
                     variant="outline"
@@ -120,7 +114,7 @@ export function ResultsSummary({ orgSlug, experimentId, experimentStatus, varian
                   </Button>
                 </div>
               )}
-            </Card>
+            </div>
           )
         })}
       </div>
