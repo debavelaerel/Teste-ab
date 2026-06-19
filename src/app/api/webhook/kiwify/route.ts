@@ -37,6 +37,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, skipped: true })
   }
 
+  console.log('[webhook:kiwify] payload', JSON.stringify(payload))
+
   const order = payload['order'] as Record<string, unknown> | undefined
   const orderId = order?.['id'] as string | undefined
   const tracker = order?.['tracker'] as Record<string, unknown> | undefined
