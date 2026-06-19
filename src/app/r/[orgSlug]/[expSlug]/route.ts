@@ -34,9 +34,7 @@ export async function GET(
     .limit(1)
 
   if (expRows.length === 0) {
-    const res = NextResponse.redirect(new URL('/', request.url), { status: 302 })
-    res.headers.set('Cache-Control', 'no-store')
-    return res
+    return new NextResponse('Experiment not found', { status: 404 })
   }
 
   const experiment = expRows[0].experiment
@@ -46,9 +44,7 @@ export async function GET(
   })
 
   if (variants.length === 0) {
-    const res = NextResponse.redirect(new URL('/', request.url), { status: 302 })
-    res.headers.set('Cache-Control', 'no-store')
-    return res
+    return new NextResponse('No variants configured', { status: 404 })
   }
 
   const cookieName = `ab_${orgSlug}_${expSlug}`
