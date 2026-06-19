@@ -10,7 +10,8 @@ export function proxy(request: NextRequest) {
     pathname.startsWith('/login') ||
     pathname.startsWith('/r/') ||
     pathname === '/tracker.js' ||
-    pathname === '/tracker-hotmart.js'
+    pathname === '/tracker-hotmart.js' ||
+    /\.[a-z0-9]+$/i.test(pathname)
 
   if (!isPublic && !session) {
     return NextResponse.redirect(new URL('/login', request.url))
