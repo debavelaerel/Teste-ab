@@ -1,9 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionCookie } from 'better-auth/cookies'
 
+const REDIRECT_HOST = 'r.alexiaduarte.com'
+
 export function proxy(request: NextRequest) {
   const session = getSessionCookie(request)
   const { pathname } = request.nextUrl
+  const host = request.headers.get('host') ?? ''
+
+  // Subdomain redirect: r.alexiaduarte.com/<orgSlug>/<expSlug> → /r/<orgSlug>/<expSlug>
+  if (host === REDIRECT_HOST) {
+    const segments = pathname.split('/').filter(Boolean)
+    if (segments.length === 2) {
+      const [orgSlug, expSlug] = segments
+      const url = request.nextUrl.clone()
+      url.pathname = `/r/${orgSlug}/${expSlug}`
+      return NextResponse.rewrite(url)
+    }
+    // Any other path on the redirect subdomain → 404
+    return new NextResponse('Not found', { status: 404 })
+  }
 
   // /api/* is excluded from the matcher below — API routes do their own auth
   const isPublic =
