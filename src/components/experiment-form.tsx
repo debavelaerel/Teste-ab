@@ -131,8 +131,10 @@ export function ExperimentForm({
           placeholder="checkout-principal"
           required
           className="font-mono"
+          disabled={!!experimentId}
         />
         <p className="text-xs text-zinc-400">Usado na URL: <code className="font-mono bg-zinc-100 px-1 rounded">/r/{orgSlug}/{slug || 'slug'}</code></p>
+        {experimentId && <p className="text-xs text-zinc-400">O slug não pode ser alterado após a criação.</p>}
       </div>
 
       {/* Checkout type */}
@@ -144,16 +146,18 @@ export function ExperimentForm({
               key={type}
               type="button"
               onClick={() => setCheckoutType(type)}
+              disabled={!!experimentId}
               className={`flex-1 h-9 rounded-lg border text-sm font-medium transition-colors ${
                 checkoutType === type
                   ? 'bg-zinc-900 text-white border-zinc-900'
                   : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-400'
-              }`}
+              } ${!!experimentId ? 'disabled:opacity-50 disabled:cursor-not-allowed' : ''}`}
             >
               {type === 'kiwify' ? 'Kiwify' : 'Hotmart'}
             </button>
           ))}
         </div>
+        {experimentId && <p className="text-xs text-zinc-400">A plataforma não pode ser alterada após a criação.</p>}
       </div>
 
       {/* Cookie days */}
