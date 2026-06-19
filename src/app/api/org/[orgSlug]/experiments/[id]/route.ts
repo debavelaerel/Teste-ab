@@ -70,16 +70,9 @@ export async function PATCH(
     variants?: { id?: string; name: string; url: string; weight: number }[]
   }
 
-  if (name !== undefined || cookieDays !== undefined) {
-    await db.update(abExperiments)
-      .set({
-        ...(name !== undefined && { name }),
-        ...(cookieDays !== undefined && { cookieDays }),
-      })
-      .where(and(eq(abExperiments.id, id), eq(abExperiments.orgId, org.id)))
-  }
-
+  // Step 1: Validate all inputs BEFORE any writes
   if (variants) {
+    // Validate URL of each variant
     for (const v of variants) {
       if (v.url !== undefined) {
         try {
@@ -91,6 +84,7 @@ export async function PATCH(
         }
       }
     }
+    // Validate sum of weights = 100
     const totalWeight = variants.reduce((sum, v) => sum + (v.weight ?? 0), 0)
     if (totalWeight !== 100) {
       return NextResponse.json(
@@ -98,6 +92,20 @@ export async function PATCH(
         { status: 400 }
       )
     }
+  }
+
+  // Step 2: Update experiment metadata (name, cookieDays)
+  if (name !== undefined || cookieDays !== undefined) {
+    await db.update(abExperiments)
+      .set({
+        ...(name !== undefined && { name }),
+        ...(cookieDays !== undefined && { cookieDays }),
+      })
+      .where(and(eq(abExperiments.id, id), eq(abExperiments.orgId, org.id)))
+  }
+
+  // Step 3: Update variants
+  if (variants) {
     for (const v of variants) {
       if (v.id) {
         await db.update(abVariants)
