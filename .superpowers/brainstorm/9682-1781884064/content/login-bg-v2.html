@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login Backgrounds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Outfit', system-ui, sans-serif;
+  background: #111;
+  padding: 28px 20px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 { color: #fff; font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.sub { color: #71717a; font-size: 13px; margin-bottom: 24px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.option {
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: border-color .18s, transform .12s;
+}
+.option:hover { border-color: #a1a1aa; transform: translateY(-2px); }
+.option.selected { border-color: #ffffff; }
+
+.bg-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  min-height: 340px;
+}
+
+/* Cards */
+.card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 28px 26px;
+  width: 100%;
+  max-width: 300px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+}
+
+.logo-wrap { text-align: center; margin-bottom: 24px; }
+.logo-name { font-weight: 800; font-size: 18px; color: #09090b; letter-spacing: -0.4px; }
+.logo-sub { font-size: 10px; color: #a1a1aa; margin-top: 3px; letter-spacing: 0.03em; }
+
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 11px; font-weight: 600; color: #3f3f46; margin-bottom: 5px; }
+.field input {
+  width: 100%; height: 38px;
+  border: 1.5px solid #e4e4e7; border-radius: 8px;
+  padding: 0 14px;
+  font-family: 'Outfit'; font-size: 13px; color: #09090b;
+  outline: none;
+}
+
+/* ── Variantes de botão ── */
+.btn { width: 100%; height: 40px; border: none; border-radius: 8px; font-family: 'Outfit'; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+/* A: fundo preto, botão branco */
+.bg-a { background: radial-gradient(ellipse at 35% 30%, #2a2a2a 0%, #111 40%, #09090b 100%); }
+.btn-a { background: #ffffff; color: #09090b; }
+
+/* B: fundo zinc escuro, botão indigo */
+.bg-b { background: radial-gradient(ellipse at 35% 30%, #27272a 0%, #18181b 50%, #09090b 100%); }
+.btn-b { background: #4f46e5; color: #fff; }
+
+/* C: fundo slate azulado, botão zinco escuro */
+.bg-c { background: radial-gradient(ellipse at 35% 30%, #1e293b 0%, #0f172a 50%, #080c14 100%); }
+.btn-c { background: #18181b; color: #fff; }
+
+/* D: fundo verde escuro, botão branco */
+.bg-d { background: radial-gradient(ellipse at 35% 30%, #14532d 0%, #052e16 50%, #020f08 100%); }
+.btn-d { background: #ffffff; color: #052e16; }
+
+.label-bar {
+  background: #1a1a1a;
+  color: #e4e4e7;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 9px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.label-bar .combo { font-size: 10px; color: #71717a; font-weight: 400; font-family: 'DM Mono', monospace; }
+.selected-badge { display: none; background: #fff; color: #09090b; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+.selected .selected-badge { display: inline-block; }
+</style>
+<script>
+function pick(el) {
+  document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'))
+  el.classList.add('selected')
+  const choice = el.dataset.choice
+  fetch('/event', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({type:'click', choice, text: el.querySelector('.label-bar span:first-child').textContent})}).catch(()=>{})
+}
+</script>
+</head>
+<body>
+
+<h1>Login — fundo vs botão</h1>
+<p class="sub">Mesmo card branco, mesmo fluxo — variando o fundo e a cor do botão para criar contraste. Clique para selecionar.</p>
+
+<div class="grid">
+
+  <!-- A: Preto + Botão Branco -->
+  <div class="option" data-choice="black-white-btn" onclick="pick(this)">
+    <div class="bg-area bg-a">
+      <div class="card">
+        <div class="logo-wrap">
+          <div class="logo-name">SplitTest</div>
+          <div class="logo-sub">Plataforma de Testes A/B</div>
+        </div>
+        <div class="field">
+          <label>E-MAIL</label>
+          <input type="email" placeholder="seu@email.com" />
+        </div>
+        <button class="btn btn-a">Próximo</button>
+      </div>
+    </div>
+    <div class="label-bar">
+      <span>A · Preto + Botão Branco</span>
+      <span class="combo">#09090B · btn #FFFFFF</span>
+      <span class="selected-badge">✓</span>
+    </div>
+  </div>
+
+  <!-- B: Zinc + Botão Indigo -->
+  <div class="option" data-choice="zinc-indigo-btn" onclick="pick(this)">
+    <div class="bg-area bg-b">
+      <div class="card">
+        <div class="logo-wrap">
+          <div class="logo-name">SplitTest</div>
+          <div class="logo-sub">Plataforma de Testes A/B</div>
+        </div>
+        <div class="field">
+          <label>E-MAIL</label>
+          <input type="email" placeholder="seu@email.com" />
+        </div>
+        <button class="btn btn-b">Próximo</button>
+      </div>
+    </div>
+    <div class="label-bar">
+      <span>B · Zinc + Botão Índigo</span>
+      <span class="combo">#18181B · btn #4F46E5</span>
+      <span class="selected-badge">✓</span>
+    </div>
+  </div>
+
+  <!-- C: Slate Azul + Botão Zinc -->
+  <div class="option" data-choice="slate-zinc-btn" onclick="pick(this)">
+    <div class="bg-area bg-c">
+      <div class="card">
+        <div class="logo-wrap">
+          <div class="logo-name">SplitTest</div>
+          <div class="logo-sub">Plataforma de Testes A/B</div>
+        </div>
+        <div class="field">
+          <label>E-MAIL</label>
+          <input type="email" placeholder="seu@email.com" />
+        </div>
+        <button class="btn btn-c">Próximo</button>
+      </div>
+    </div>
+    <div class="label-bar">
+      <span>C · Slate Azul + Botão Zinc</span>
+      <span class="combo">#0F172A · btn #18181B</span>
+      <span class="selected-badge">✓</span>
+    </div>
+  </div>
+
+  <!-- D: Verde Escuro + Botão Branco -->
+  <div class="option" data-choice="green-white-btn" onclick="pick(this)">
+    <div class="bg-area bg-d">
+      <div class="card">
+        <div class="logo-wrap">
+          <div class="logo-name">SplitTest</div>
+          <div class="logo-sub">Plataforma de Testes A/B</div>
+        </div>
+        <div class="field">
+          <label>E-MAIL</label>
+          <input type="email" placeholder="seu@email.com" />
+        </div>
+        <button class="btn btn-d">Próximo</button>
+      </div>
+    </div>
+    <div class="label-bar">
+      <span>D · Verde Escuro + Botão Branco</span>
+      <span class="combo">#052E16 · btn #FFFFFF</span>
+      <span class="selected-badge">✓</span>
+    </div>
+  </div>
+
+</div>
+
+<p style="font-size:12px;color:#52525b;text-align:center;margin-top:20px;">Clique para selecionar · posso ajustar qualquer combinação</p>
+
+</body>
+</html>

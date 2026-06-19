@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Outfit', system-ui, sans-serif;
+  background: #0a0a0a;
+  padding: 32px 24px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+.subtitle { font-size: 13px; color: #71717a; margin-bottom: 28px; }
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ── Full background ── */
+.step-wrapper {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0,0,0,.4);
+}
+
+.step-bg {
+  background: #09090b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 20px;
+  min-height: 320px;
+}
+
+/* ── Card ── */
+.card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 340px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.3);
+}
+
+/* ── Logo ── */
+.logo-wrap { text-align: center; margin-bottom: 28px; }
+.logo-name {
+  font-family: 'Outfit', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: #09090b;
+  letter-spacing: -0.5px;
+}
+.logo-sub {
+  font-size: 11px;
+  color: #a1a1aa;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  margin-top: 3px;
+}
+
+/* ── Header (step 2+) ── */
+.step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.back-btn {
+  font-size: 12px;
+  font-weight: 500;
+  color: #52525b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.logo-inline { font-size: 14px; font-weight: 800; color: #09090b; letter-spacing: -0.3px; }
+
+/* ── Form ── */
+.field { margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #3f3f46;
+  margin-bottom: 6px;
+  letter-spacing: 0.01em;
+}
+.field input {
+  width: 100%;
+  height: 40px;
+  border: 1.5px solid #e4e4e7;
+  border-radius: 8px;
+  padding: 0 40px 0 14px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  color: #09090b;
+  background: #fff;
+  outline: none;
+}
+.field input:focus { border-color: #18181b; box-shadow: 0 0 0 3px rgba(24,24,27,.08); }
+.field .input-wrap { position: relative; }
+.field .input-icon {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  color: #a1a1aa; font-size: 14px;
+}
+
+.forgot-link {
+  font-size: 12px; font-weight: 500; color: #52525b;
+  display: block; margin-top: 8px; cursor: pointer;
+}
+
+/* ── Button ── */
+.btn-primary {
+  width: 100%; height: 40px;
+  background: #18181b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.btn-primary:disabled { background: #d4d4d8; color: #a1a1aa; }
+
+/* ── Step heading ── */
+.step-heading {
+  font-size: 18px;
+  font-weight: 700;
+  color: #09090b;
+  text-align: center;
+  margin-bottom: 6px;
+  letter-spacing: -0.3px;
+}
+.step-desc {
+  font-size: 12px;
+  color: #71717a;
+  text-align: center;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+/* ── OTP ── */
+.otp-row {
+  display: flex; gap: 8px; justify-content: center; margin-bottom: 20px;
+}
+.otp-box {
+  width: 40px; height: 48px;
+  border: 1.5px solid #e4e4e7;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 20px;
+  font-weight: 500;
+  color: #09090b;
+  background: #fff;
+}
+.otp-box.filled { border-color: #18181b; background: #fafafa; }
+
+/* ── Strength ── */
+.strength-bar-bg { height: 5px; background: #f4f4f5; border-radius: 99px; overflow: hidden; margin-top: 10px; }
+.strength-bar { height: 100%; border-radius: 99px; background: #22c55e; width: 75%; }
+.strength-label { font-size: 11px; font-weight: 700; color: #22c55e; margin-top: 5px; }
+.hint-row { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #22c55e; margin-top: 4px; }
+.hint-row.pending { color: #a1a1aa; }
+
+/* ── Success ── */
+.success-icon {
+  width: 56px; height: 56px;
+  background: #18181b;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 22px;
+}
+
+/* ── Step label ── */
+.step-label {
+  background: #18181b;
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 8px 16px;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+</style>
+</head>
+<body>
+
+<h1>Login — fluxo completo (Neutral Ink)</h1>
+<p class="subtitle">Mesmo fluxo do projeto-deisy, adaptado ao design system escolhido. Background zinc escuro · card branco · Outfit + DM Mono.</p>
+
+<div class="steps-grid">
+
+  <!-- Step 1: Email -->
+  <div class="step-wrapper">
+    <div class="step-bg">
+      <div class="card">
+        <div class="logo-wrap">
+          <div class="logo-name">SplitTest</div>
+          <div class="logo-sub">Plataforma de Testes A/B</div>
+        </div>
+        <div class="field">
+          <label>E-mail</label>
+          <div class="input-wrap">
+            <input type="email" placeholder="seu@email.com" />
+            <span class="input-icon">✉</span>
+          </div>
+        </div>
+        <button class="btn-primary">Próximo</button>
+      </div>
+    </div>
+    <div class="step-label">Step 1 · Informe o e-mail</div>
+  </div>
+
+  <!-- Step 2: Password -->
+  <div class="step-wrapper">
+    <div class="step-bg">
+      <div class="card">
+        <div class="step-header">
+          <span class="back-btn">← Voltar</span>
+          <span class="logo-inline">SplitTest</span>
+        </div>
+        <div class="step-heading">Olá, <span style="color:#09090b">Alexia</span>! 👋</div>
+        <div style="height:20px;"></div>
+        <div class="field">
+          <label>Senha</label>
+          <div class="input-wrap">
+            <input type="password" placeholder="••••••••" />
+            <span class="input-icon" style="cursor:pointer;">👁</span>
+          </div>
+          <a class="forgot-link">Esqueceu sua senha?</a>
+        </div>
+        <button class="btn-primary">Entrar</button>
+      </div>
+    </div>
+    <div class="step-label">Step 2 · Senha</div>
+  </div>
+
+  <!-- Step 3: Forgot -->
+  <div class="step-wrapper">
+    <div class="step-bg">
+      <div class="card">
+        <div class="step-header">
+          <span class="back-btn">← Voltar</span>
+          <span class="logo-inline">SplitTest</span>
+        </div>
+        <div class="step-heading">Recuperar senha</div>
+        <div class="step-desc">Enviaremos um código de verificação para o seu e-mail.</div>
+        <div class="field">
+          <label>E-mail</label>
+          <div class="input-wrap">
+            <input type="email" placeholder="seu@email.com" />
+            <span class="input-icon">✉</span>
+          </div>
+        </div>
+        <button class="btn-primary">Enviar código</button>
+      </div>
+    </div>
+    <div class="step-label">Step 3 · Recuperar senha</div>
+  </div>
+
+  <!-- Step 4: OTP -->
+  <div class="step-wrapper">
+    <div class="step-bg">
+      <div class="card">
+        <div class="step-header">
+          <span class="back-btn">← Voltar</span>
+          <span class="logo-inline">SplitTest</span>
+        </div>
+        <div class="step-heading">Código de verificação</div>
+        <div class="step-desc">Digite o código enviado para<br/><strong style="color:#09090b;">alexia@email.com</strong></div>
+        <div class="otp-row">
+          <div class="otp-box filled">3</div>
+          <div class="otp-box filled">7</div>
+          <div class="otp-box filled">2</div>
+          <div class="otp-box">_</div>
+          <div class="otp-box">_</div>
+          <div class="otp-box">_</div>
+        </div>
+        <button class="btn-primary" disabled>Verificar</button>
+      </div>
+    </div>
+    <div class="step-label">Step 4 · Código OTP</div>
+  </div>
+
+  <!-- Step 5: New password -->
+  <div class="step-wrapper">
+    <div class="step-bg">
+      <div class="card">
+        <div class="step-header">
+          <span class="back-btn">← Voltar</span>
+          <span class="logo-inline">SplitTest</span>
+        </div>
+        <div class="step-heading">Crie uma nova senha</div>
+        <div style="height:16px;"></div>
+        <div class="field">
+          <label>Nova Senha</label>
+          <div class="input-wrap">
+            <input type="password" value="Minha@Senha" />
+            <span class="input-icon">👁</span>
+          </div>
+          <div class="strength-bar-bg"><div class="strength-bar"></div></div>
+          <div class="strength-label">Boa</div>
+          <div class="hint-row">✓ Ao menos 6 caracteres</div>
+          <div class="hint-row">✓ Letra maiúscula</div>
+          <div class="hint-row">✓ Um número</div>
+          <div class="hint-row pending">· Caractere especial !@#$%</div>
+        </div>
+        <div class="field">
+          <label>Confirme a Senha</label>
+          <div class="input-wrap">
+            <input type="password" placeholder="••••••••" />
+          </div>
+        </div>
+        <button class="btn-primary">Confirmar</button>
+      </div>
+    </div>
+    <div class="step-label">Step 5 · Nova senha</div>
+  </div>
+
+  <!-- Step 6: Success -->
+  <div class="step-wrapper">
+    <div class="step-bg">
+      <div class="card" style="text-align:center;padding-top:40px;padding-bottom:40px;">
+        <div class="success-icon">✓</div>
+        <div class="step-heading">Senha redefinida!</div>
+        <div class="step-desc" style="margin-top:8px;margin-bottom:28px;">Sua senha foi alterada com sucesso.</div>
+        <button class="btn-primary">Fazer login</button>
+      </div>
+    </div>
+    <div class="step-label">Step 6 · Sucesso</div>
+  </div>
+
+</div>
+
+<p style="font-family:'Outfit',sans-serif;font-size:12px;color:#52525b;text-align:center;margin-top:24px;">
+  Fluxo idêntico ao projeto-deisy · cores e tipografia adaptadas ao Neutral Ink
+</p>
+
+</body>
+</html>

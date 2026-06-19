@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teste de Fontes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #f1f5f9; font-family: 'Outfit', system-ui, sans-serif; padding: 24px; min-height: 100vh; }
+
+  h1 { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.3px; }
+  .subtitle { font-family: 'Outfit', sans-serif; font-size: 13px; color: #64748b; margin-bottom: 24px; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  /* ─── OPTION A: Neutral Ink + Outfit ─── */
+  .demo-a { border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.10); cursor: pointer; border: 3px solid transparent; transition: border-color .2s; }
+  .demo-a:hover { border-color: #6366f1; }
+  .demo-a.selected { border-color: #6366f1; }
+
+  .demo-a .app { display: flex; height: 420px; }
+  .demo-a .sidebar { width: 200px; background: #fafafa; border-right: 1px solid #ebebeb; display: flex; flex-direction: column; padding: 18px 12px; flex-shrink: 0; }
+  .demo-a .sidebar .logo { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+  .demo-a .sidebar .logo-icon { width: 26px; height: 26px; background: #18181b; border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+  .demo-a .sidebar .logo-icon::after { content:''; display:block; width:10px; height:10px; background:#fff; border-radius:3px; }
+  .demo-a .sidebar .logo-name { font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; color: #18181b; letter-spacing: -0.3px; }
+  .demo-a .sidebar .nav-item { font-family: 'Outfit', sans-serif; font-size: 12px; padding: 7px 10px; border-radius: 6px; color: #71717a; display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+  .demo-a .sidebar .nav-item.active { background: #f4f4f5; color: #18181b; font-weight: 600; }
+  .demo-a .sidebar .user-footer { margin-top: auto; padding-top: 12px; border-top: 1px solid #ebebeb; display: flex; align-items: center; gap: 8px; }
+  .demo-a .sidebar .avatar { width: 24px; height: 24px; background: #e4e4e7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Outfit'; font-size: 10px; font-weight: 700; color: #52525b; }
+  .demo-a .sidebar .username { font-family: 'Outfit', sans-serif; font-size: 11px; color: #a1a1aa; }
+
+  .demo-a .main { flex: 1; background: #fff; padding: 24px; overflow: auto; }
+  .demo-a .main .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .demo-a .main h2 { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 700; color: #09090b; letter-spacing: -0.5px; }
+  .demo-a .main .btn-new { border: 1px solid #e4e4e7; border-radius: 7px; padding: 6px 14px; font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 500; color: #18181b; background: #fff; cursor: pointer; }
+  .demo-a .main .btn-new:hover { background: #f4f4f5; }
+
+  .demo-a .exp-card { border: 1px solid #f0f0f0; border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; }
+  .demo-a .exp-card .exp-name { font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600; color: #18181b; }
+  .demo-a .exp-card .exp-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: #a1a1aa; margin-top: 4px; }
+  .demo-a .exp-card .exp-row { display: flex; justify-content: space-between; align-items: center; }
+  .demo-a .badge { font-family: 'Outfit', sans-serif; font-size: 11px; padding: 2px 9px; border-radius: 20px; font-weight: 500; }
+  .demo-a .badge.active { background: #f0fdf4; color: #16a34a; }
+  .demo-a .badge.paused { background: #fffbeb; color: #d97706; }
+  .demo-a .badge.finished { background: #f0f9ff; color: #0369a1; }
+
+  .demo-a .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+  .demo-a .stat-card { border: 1px solid #f0f0f0; border-radius: 10px; padding: 14px; }
+  .demo-a .stat-card .stat-val { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: #09090b; }
+  .demo-a .stat-card .stat-val.green { color: #16a34a; }
+  .demo-a .stat-card .stat-label { font-family: 'Outfit', sans-serif; font-size: 11px; color: #a1a1aa; margin-top: 4px; }
+
+  /* ─── OPTION B: Slate + Violet + Outfit ─── */
+  .demo-b { border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.14); cursor: pointer; border: 3px solid transparent; transition: border-color .2s; }
+  .demo-b:hover { border-color: #6366f1; }
+  .demo-b.selected { border-color: #6366f1; }
+
+  .demo-b .app { display: flex; height: 420px; }
+  .demo-b .sidebar { width: 200px; background: #0f172a; border-right: 1px solid #1e293b; display: flex; flex-direction: column; padding: 18px 12px; flex-shrink: 0; }
+  .demo-b .sidebar .logo { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+  .demo-b .sidebar .logo-icon { width: 26px; height: 26px; background: #6366f1; border-radius: 7px; }
+  .demo-b .sidebar .logo-name { font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; color: #f8fafc; letter-spacing: -0.3px; }
+  .demo-b .sidebar .nav-item { font-family: 'Outfit', sans-serif; font-size: 12px; padding: 7px 10px; border-radius: 6px; color: #475569; display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+  .demo-b .sidebar .nav-item.active { background: #1e293b; color: #e2e8f0; font-weight: 600; }
+  .demo-b .sidebar .user-footer { margin-top: auto; padding-top: 12px; border-top: 1px solid #1e293b; display: flex; align-items: center; gap: 8px; }
+  .demo-b .sidebar .avatar { width: 24px; height: 24px; background: #334155; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Outfit'; font-size: 10px; font-weight: 700; color: #94a3b8; }
+  .demo-b .sidebar .username { font-family: 'Outfit', sans-serif; font-size: 11px; color: #475569; }
+
+  .demo-b .main { flex: 1; background: #f8fafc; padding: 24px; overflow: auto; }
+  .demo-b .main .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .demo-b .main h2 { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 700; color: #0f172a; letter-spacing: -0.5px; }
+  .demo-b .main .btn-new { background: #6366f1; border-radius: 7px; padding: 6px 14px; font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 600; color: #fff; border: none; cursor: pointer; }
+
+  .demo-b .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+  .demo-b .stat-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; }
+  .demo-b .stat-card .stat-val { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: #0f172a; }
+  .demo-b .stat-card .stat-val.violet { color: #6366f1; }
+  .demo-b .stat-card .stat-val.green { color: #16a34a; }
+  .demo-b .stat-card .stat-label { font-family: 'Outfit', sans-serif; font-size: 11px; color: #94a3b8; margin-top: 4px; }
+
+  .demo-b .exp-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; }
+  .demo-b .exp-card .exp-name { font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600; color: #0f172a; }
+  .demo-b .exp-card .exp-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: #94a3b8; margin-top: 4px; }
+  .demo-b .exp-card .exp-row { display: flex; justify-content: space-between; align-items: center; }
+  .demo-b .badge { font-family: 'Outfit', sans-serif; font-size: 11px; padding: 2px 9px; border-radius: 20px; font-weight: 500; }
+  .demo-b .badge.active { background: #f0fdf4; color: #16a34a; }
+  .demo-b .badge.paused { background: #fffbeb; color: #d97706; }
+
+  /* label */
+  .option-label { font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600; color: #0f172a; text-align: center; padding: 12px; background: #fff; border-top: 1px solid #f0f0f0; }
+  .option-label span { font-weight: 400; color: #64748b; }
+
+  .click-hint { font-family: 'Outfit', sans-serif; font-size: 12px; color: #94a3b8; text-align: center; margin-top: 20px; }
+
+  /* Selected state */
+  .selected-badge { display: none; font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 600; background: #6366f1; color: #fff; padding: 4px 12px; border-radius: 20px; text-align: center; margin-top: 8px; }
+  .selected .selected-badge { display: block; }
+</style>
+<script>
+  function select(el) {
+    document.querySelectorAll('.demo-a, .demo-b').forEach(d => d.classList.remove('selected'));
+    el.classList.toggle('selected');
+    const choice = el.dataset.choice;
+    // record event
+    fetch('/event', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({type:'click', choice, text: el.querySelector('.option-label').textContent.trim()})}).catch(()=>{});
+  }
+</script>
+</head>
+<body>
+
+<h1>A vs B — com Outfit + DM Mono</h1>
+<p class="subtitle">Fontes do projeto-deisy aplicadas às duas direções que você gostou. Clique para selecionar.</p>
+
+<div class="split">
+
+  <!-- DEMO A -->
+  <div class="demo-a" data-choice="neutral-ink-outfit" onclick="select(this)">
+    <div class="app">
+      <div class="sidebar">
+        <div class="logo">
+          <div class="logo-icon"></div>
+          <span class="logo-name">SplitTest</span>
+        </div>
+        <div class="nav-item active">⚗ Experimentos</div>
+        <div class="nav-item">◎ Eventos</div>
+        <div class="nav-item">☰ Docs</div>
+        <div class="nav-item">◈ Config</div>
+        <div class="user-footer">
+          <div class="avatar">A</div>
+          <span class="username">Alexia Duarte</span>
+        </div>
+      </div>
+      <div class="main">
+        <div class="page-header">
+          <h2>Experimentos</h2>
+          <button class="btn-new">+ Novo experimento</button>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-val">14</div>
+            <div class="stat-label">experimentos</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val">4.2%</div>
+            <div class="stat-label">taxa média</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val green">+18%</div>
+            <div class="stat-label">vs controle</div>
+          </div>
+        </div>
+        <div class="exp-card">
+          <div class="exp-row">
+            <div>
+              <div class="exp-name">Checkout Principal v2</div>
+              <div class="exp-meta">/r/alexia/checkout · 2 variantes</div>
+            </div>
+            <span class="badge active">ativo</span>
+          </div>
+        </div>
+        <div class="exp-card">
+          <div class="exp-row">
+            <div>
+              <div class="exp-name">Headline de Vendas</div>
+              <div class="exp-meta">/r/alexia/headline · 3 variantes</div>
+            </div>
+            <span class="badge paused">pausado</span>
+          </div>
+        </div>
+        <div class="exp-card">
+          <div class="exp-row">
+            <div>
+              <div class="exp-name">Preço de Entrada</div>
+              <div class="exp-meta">/r/alexia/preco · 2 variantes</div>
+            </div>
+            <span class="badge finished">finalizado</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="option-label">A — Neutral Ink <span>· cinza/branco, sem acento forte</span></div>
+    <div class="selected-badge">✓ Selecionado</div>
+  </div>
+
+  <!-- DEMO B -->
+  <div class="demo-b" data-choice="slate-violet-outfit" onclick="select(this)">
+    <div class="app">
+      <div class="sidebar">
+        <div class="logo">
+          <div class="logo-icon"></div>
+          <span class="logo-name">SplitTest</span>
+        </div>
+        <div class="nav-item active">⚗ Experimentos</div>
+        <div class="nav-item">◎ Eventos</div>
+        <div class="nav-item">☰ Docs</div>
+        <div class="nav-item">◈ Config</div>
+        <div class="user-footer">
+          <div class="avatar">A</div>
+          <span class="username">Alexia Duarte</span>
+        </div>
+      </div>
+      <div class="main">
+        <div class="page-header">
+          <h2>Experimentos</h2>
+          <button class="btn-new">+ Novo experimento</button>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-val">14</div>
+            <div class="stat-label">experimentos</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val violet">4.2%</div>
+            <div class="stat-label">taxa média</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val green">+18%</div>
+            <div class="stat-label">vs controle</div>
+          </div>
+        </div>
+        <div class="exp-card">
+          <div class="exp-row">
+            <div>
+              <div class="exp-name">Checkout Principal v2</div>
+              <div class="exp-meta">/r/alexia/checkout · 2 variantes</div>
+            </div>
+            <span class="badge active">ativo</span>
+          </div>
+        </div>
+        <div class="exp-card">
+          <div class="exp-row">
+            <div>
+              <div class="exp-name">Headline de Vendas</div>
+              <div class="exp-meta">/r/alexia/headline · 3 variantes</div>
+            </div>
+            <span class="badge paused">pausado</span>
+          </div>
+        </div>
+        <div class="exp-card">
+          <div class="exp-row">
+            <div>
+              <div class="exp-name">Preço de Entrada</div>
+              <div class="exp-meta">/r/alexia/preco · 2 variantes</div>
+            </div>
+            <span class="badge active">ativo</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="option-label">B — Slate + Violet <span>· sidebar escura, acento índigo</span></div>
+    <div class="selected-badge">✓ Selecionado</div>
+  </div>
+
+</div>
+
+<p class="click-hint">Clique num dos dois para selecionar · URL: http://localhost:54015/?key=29cf8c5e9e67d65c956052628c3bdaab9794ee69b040e5c22653a79e9ac3aafb</p>
+
+</body>
+</html>

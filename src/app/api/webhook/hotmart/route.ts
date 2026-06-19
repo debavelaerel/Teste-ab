@@ -51,12 +51,13 @@ export async function POST(request: NextRequest) {
 
   const parts = trackerToken.split(':')
 
-  if (parts.length !== 3) {
+  if (parts.length < 3) {
     console.warn('[webhook:hotmart] skipped', { reason: 'invalid tracker_token format', trackerToken })
     return NextResponse.json({ ok: true, reason: 'invalid tracker_token format' })
   }
 
-  const [orgSlug, expSlug, labelRaw] = parts
+  // Format: orgSlug:expSlug:variantLabel[:visitorId]
+  const [orgSlug, expSlug, labelRaw, visitorId] = parts
   const label = labelRaw.toUpperCase()
 
   if (!orgSlug || !expSlug || !label) {
@@ -91,6 +92,7 @@ export async function POST(request: NextRequest) {
       .values({
         experimentId: experiment.id,
         variantId: variant.id,
+        visitorId: visitorId || 'unknown',
         externalOrderId: transactionId,
         source: 'hotmart',
         amount: String(amount),

@@ -19,7 +19,12 @@ export async function POST(
     throw e
   }
 
-  const body = await request.json()
+  let body: Record<string, unknown>
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'JSON inválido' }, { status: 400 })
+  }
   const { name, slug, cookieDays = 30, checkoutType = 'kiwify', variants } = body as {
     name: string
     slug: string

@@ -51,12 +51,13 @@ export async function POST(request: NextRequest) {
 
   const parts = s1.split(':')
 
-  if (parts.length !== 3) {
+  if (parts.length < 3) {
     console.warn('[webhook:kiwify] skipped', { reason: 'invalid s1 format', s1 })
     return NextResponse.json({ ok: true, reason: 'invalid s1 format' })
   }
 
-  const [orgSlug, expSlug, labelRaw] = parts
+  // Format: orgSlug:expSlug:variantLabel[:visitorId]
+  const [orgSlug, expSlug, labelRaw, visitorId] = parts
   const label = labelRaw.toUpperCase()
 
   if (!orgSlug || !expSlug || !label) {
@@ -91,6 +92,7 @@ export async function POST(request: NextRequest) {
       .values({
         experimentId: experiment.id,
         variantId: variant.id,
+        visitorId: visitorId || 'unknown',
         externalOrderId: orderId,
         source: 'kiwify',
         amount: String(amount),

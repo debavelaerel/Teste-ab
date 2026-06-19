@@ -91,14 +91,24 @@ export async function GET(
     const isNew = !existingCookie
     if (isNew) {
       console.log('[redirector] new_visit', { orgSlug, expSlug, variant: variant.label, visitorId })
-      db.insert(abVisits)
-        .values({ experimentId: experiment.id, variantId: variant.id, visitorId })
-        .onConflictDoNothing()
-        .catch(err => console.error('[redirector] visit insert failed:', err))
     }
-    db.insert(abSessions)
-      .values({ experimentId: experiment.id, variantId: variant.id, visitorId, isNewVisitor: isNew ? '1' : '0' })
-      .catch(err => console.error('[redirector] session insert failed:', err))
+    const inserts: Promise<unknown>[] = [
+      db.insert(abSessions)
+        .values({ experimentId: experiment.id, variantId: variant.id, visitorId, isNewVisitor: isNew ? '1' : '0' })
+        .catch(err => console.error('[redirector] session insert failed:', err)),
+    ]
+    if (isNew) {
+      inserts.push(
+        db.insert(abVisits)
+          .values({ experimentId: experiment.id, variantId: variant.id, visitorId })
+          .onConflictDoNothing()
+          .catch(err => console.error('[redirector] visit insert failed:', err))
+      )
+    }
+    await Promise.race([
+      Promise.allSettled(inserts),
+      new Promise(resolve => setTimeout(resolve, 300)),
+    ])
   }
 
   let destUrl: URL

@@ -23,7 +23,12 @@ export async function PATCH(
   })
   if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  const body = await request.json()
+  let body: Record<string, unknown>
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'JSON inválido' }, { status: 400 })
+  }
 
   // Guard: block checkoutType change if conversions already exist
   if (body.checkoutType !== undefined && body.checkoutType !== existing.checkoutType) {
@@ -38,21 +43,21 @@ export async function PATCH(
       )
     }
     await db.update(abExperiments)
-      .set({ checkoutType: body.checkoutType })
+      .set({ checkoutType: body.checkoutType as 'kiwify' | 'hotmart' })
       .where(and(eq(abExperiments.id, id), eq(abExperiments.orgId, org.id)))
     // Do not return early — other fields in the same request continue below
   }
 
   if (body.status !== undefined) {
-    const update: Partial<typeof abExperiments.$inferInsert> = { status: body.status }
+    const update: Partial<typeof abExperiments.$inferInsert> = { status: body.status as 'active' | 'paused' | 'finished' }
     if (body.status === 'finished') {
       update.finishedAt = new Date()
       if (body.winnerVariantId) {
         const winnerVariant = await db.query.abVariants.findFirst({
-          where: and(eq(abVariants.id, body.winnerVariantId), eq(abVariants.experimentId, id)),
+          where: and(eq(abVariants.id, body.winnerVariantId as string), eq(abVariants.experimentId, id)),
         })
         if (!winnerVariant) return NextResponse.json({ error: 'Variant not found' }, { status: 400 })
-        update.winnerVariantId = body.winnerVariantId
+        update.winnerVariantId = body.winnerVariantId as string
       }
     }
     await db.update(abExperiments).set(update).where(and(eq(abExperiments.id, id), eq(abExperiments.orgId, org.id)))
