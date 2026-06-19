@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -34,6 +34,7 @@ export function ExperimentForm({
   ],
 }: Props) {
   const router = useRouter()
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [name, setName] = useState(initialName)
   const [slug, setSlug] = useState(initialSlug)
   const [cookieDays, setCookieDays] = useState(initialCookieDays)
@@ -41,7 +42,20 @@ export function ExperimentForm({
   const [variants, setVariants] = useState<VariantRow[]>(initialVariants)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [successSlug, setSuccessSlug] = useState<string | undefined>(undefined)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!success) return
+    const destSlug = successSlug ?? slug
+    timeoutRef.current = setTimeout(() => {
+      router.push(`/org/${orgSlug}/experiments/${destSlug}`)
+      router.refresh()
+    }, 1500)
+    return () => {
+      if (timeoutRef.current !== null) clearTimeout(timeoutRef.current)
+    }
+  }, [success, successSlug, slug, orgSlug, router])
 
   const totalWeight = variants.reduce((s, v) => s + v.weight, 0)
 
@@ -92,21 +106,26 @@ export function ExperimentForm({
       body: JSON.stringify(payload),
     })
 
-    setLoading(false)
-
     if (!res.ok) {
       const data = await res.json().catch(() => ({}))
       setError((data as { error?: string }).error ?? 'Erro ao salvar. Tente novamente.')
+      setLoading(false)
       return
     }
 
-    const data = await res.json().catch(() => ({}))
-    const expSlug = experimentId ? slug : (data as { slug?: string }).slug
+    if (!experimentId) {
+      // POST: expect { slug } in response
+      const data = await res.json().catch(() => ({}))
+      const { slug: returnedSlug, error: serverError } = data as { slug?: string; error?: string }
+      if (serverError || !returnedSlug) {
+        setError(serverError ?? 'Erro ao salvar. Tente novamente.')
+        setLoading(false)
+        return
+      }
+      setSuccessSlug(returnedSlug)
+    }
+    // loading stays true until navigation — prevents double-submit during the 1.5s window
     setSuccess(true)
-    setTimeout(() => {
-      router.push(`/org/${orgSlug}/experiments/${expSlug}`)
-      router.refresh()
-    }, 1500)
   }
 
   return (

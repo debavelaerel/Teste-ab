@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { eq, and } from 'drizzle-orm'
-import { randomUUID, createHmac } from 'crypto'
+import { randomUUID } from 'crypto'
 import { db } from '@/db'
 import { abExperiments, abOrganizations, abVariants, abVisits, abSessions } from '@/db/schema'
 
@@ -39,11 +39,6 @@ async function getExperiment(orgSlug: string, expSlug: string) {
   const entry: CacheEntry = { experiment, variants, expiresAt: Date.now() + CACHE_TTL }
   expCache.set(key, entry)
   return entry
-}
-
-function signVisitorId(visitorId: string): string {
-  const secret = process.env.VISITOR_HMAC_SECRET ?? 'dev-secret'
-  return createHmac('sha256', secret).update(visitorId).digest('hex').slice(0, 16)
 }
 
 function weightedRandom(variants: { label: string; weight: number }[]): string {
@@ -129,8 +124,7 @@ export async function GET(
     res.headers.set('Cache-Control', 'no-store')
     return res
   }
-  const s1Token = signVisitorId(visitorId)
-  destUrl.searchParams.set('s1', `${orgSlug}:${expSlug}:${variant.label}:${s1Token}`)
+  destUrl.searchParams.set('s1', `${orgSlug}:${expSlug}:${variant.label}:${visitorId}`)
 
   const response = NextResponse.redirect(destUrl.toString(), { status: 302 })
 

@@ -72,6 +72,12 @@ export async function PATCH(
 
   // Step 1: Validate all inputs BEFORE any writes
   if (variants) {
+    if (variants.length < 2 || variants.length > 5) {
+      return NextResponse.json(
+        { error: 'O experimento deve ter entre 2 e 5 variantes' },
+        { status: 400 }
+      )
+    }
     // Validate URL of each variant
     for (const v of variants) {
       if (v.url !== undefined) {
