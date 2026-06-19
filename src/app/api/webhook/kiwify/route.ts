@@ -4,11 +4,13 @@ import crypto from 'crypto'
 import { db } from '@/db'
 import { abExperiments, abVariants, abConversions } from '@/db/schema'
 
-function verifySignature(body: string, signature: string, secret: string): boolean {
-  if (!secret) return false
-  const expected = crypto.createHmac('sha256', secret).update(body).digest('hex')
+function verifyToken(token: string, secret: string): boolean {
+  if (!secret || !token) return false
   try {
-    return crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(signature, 'hex'))
+    const a = Buffer.from(token)
+    const b = Buffer.from(secret)
+    if (a.length !== b.length) return false
+    return crypto.timingSafeEqual(a, b)
   } catch {
     return false
   }
@@ -19,7 +21,7 @@ export async function POST(request: NextRequest) {
   const signature = request.headers.get('x-kiwify-event-token') ?? ''
   const secret = process.env.KIWIFY_WEBHOOK_SECRET ?? ''
 
-  if (!verifySignature(body, signature, secret)) {
+  if (!verifyToken(signature, secret)) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
 
