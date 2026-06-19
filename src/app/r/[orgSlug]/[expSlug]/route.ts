@@ -124,7 +124,7 @@ export async function GET(
     res.headers.set('Cache-Control', 'no-store')
     return res
   }
-  destUrl.searchParams.set('s1', `${orgSlug}:${expSlug}:${variant.label}`)
+  destUrl.searchParams.set('s1', `${orgSlug}:${expSlug}:${variant.label}:${visitorId}`)
 
   const response = NextResponse.redirect(destUrl.toString(), { status: 302 })
 
