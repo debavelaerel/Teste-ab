@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { FlaskConical, FileText, Settings } from 'lucide-react'
+import { FlaskConical, FileText, Settings, Activity } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
@@ -11,6 +11,12 @@ const NAV_ITEMS = [
     href: (slug: string) => `/org/${slug}`,
     isActive: (path: string, slug: string) =>
       path === `/org/${slug}` || path.startsWith(`/org/${slug}/experiments`),
+  },
+  {
+    label: 'Eventos',
+    icon: Activity,
+    href: (slug: string) => `/org/${slug}/events`,
+    isActive: (path: string, slug: string) => path.startsWith(`/org/${slug}/events`),
   },
   {
     label: 'Docs',

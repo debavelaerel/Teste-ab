@@ -88,6 +88,10 @@ export async function GET(
     variants.find((v) => v.label === variantLabel) ?? variants[0]
 
   if (experiment.status === 'active') {
+    const isNew = !existingCookie
+    if (isNew) {
+      console.log('[redirector] new_visit', { orgSlug, expSlug, variant: variant.label, visitorId })
+    }
     db.insert(abVisits)
       .values({ experimentId: experiment.id, variantId: variant.id, visitorId })
       .onConflictDoNothing()
