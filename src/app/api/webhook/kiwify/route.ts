@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { eq, and } from 'drizzle-orm'
 import crypto from 'crypto'
 import { db } from '@/db'
-import { abExperiments, abOrganizations, abVariants, abConversions } from '@/db/schema'
+import { abExperiments, abVariants, abConversions } from '@/db/schema'
 
 function verifySignature(body: string, signature: string, secret: string): boolean {
   if (!secret) return false
@@ -46,19 +46,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, reason: 'not trackable' })
   }
 
-  const colonFirst = s1.indexOf(':')
-  const colonLast = s1.lastIndexOf(':')
+  const colon = s1.indexOf(':')
 
-  if (colonFirst === -1 || colonFirst === colonLast) {
+  if (colon === -1) {
     console.warn('[webhook:kiwify] skipped', { reason: 'invalid s1 format', s1 })
     return NextResponse.json({ ok: true, reason: 'invalid s1 format' })
   }
 
-  const orgSlug = s1.slice(0, colonFirst)
-  const expSlug = s1.slice(colonFirst + 1, colonLast)
-  const label = s1.slice(colonLast + 1).toUpperCase()
+  const expSlug = s1.slice(0, colon)
+  const label = s1.slice(colon + 1).toUpperCase()
 
-  if (!orgSlug || !expSlug || !label) {
+  if (!expSlug || !label) {
     console.warn('[webhook:kiwify] skipped', { reason: 'empty s1 parts', s1 })
     return NextResponse.json({ ok: true, reason: 'empty s1 parts' })
   }
@@ -67,7 +65,6 @@ export async function POST(request: NextRequest) {
     const rows = await db
       .select({ experiment: abExperiments, variant: abVariants })
       .from(abExperiments)
-      .innerJoin(abOrganizations, eq(abExperiments.orgId, abOrganizations.id))
       .innerJoin(
         abVariants,
         and(
@@ -75,16 +72,11 @@ export async function POST(request: NextRequest) {
           eq(abVariants.label, label)
         )
       )
-      .where(
-        and(
-          eq(abOrganizations.slug, orgSlug),
-          eq(abExperiments.slug, expSlug)
-        )
-      )
+      .where(eq(abExperiments.slug, expSlug))
       .limit(1)
 
     if (rows.length === 0) {
-      console.warn('[webhook:kiwify] skipped', { reason: 'experiment not found', orgSlug, expSlug, label })
+      console.warn('[webhook:kiwify] skipped', { reason: 'experiment not found', expSlug, label })
       return NextResponse.json({ ok: true, reason: 'experiment or variant not found' })
     }
 

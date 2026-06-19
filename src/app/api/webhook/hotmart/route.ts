@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { eq, and } from 'drizzle-orm'
 import crypto from 'crypto'
 import { db } from '@/db'
-import { abExperiments, abOrganizations, abVariants, abConversions } from '@/db/schema'
+import { abExperiments, abVariants, abConversions } from '@/db/schema'
 
 function verifyToken(received: string, expected: string): boolean {
   if (!expected) return false
@@ -49,19 +49,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, reason: 'not trackable' })
   }
 
-  const colonFirst = trackerToken.indexOf(':')
-  const colonLast = trackerToken.lastIndexOf(':')
+  const colon = trackerToken.indexOf(':')
 
-  if (colonFirst === -1 || colonFirst === colonLast) {
+  if (colon === -1) {
     console.warn('[webhook:hotmart] skipped', { reason: 'invalid tracker_token format', trackerToken })
     return NextResponse.json({ ok: true, reason: 'invalid tracker_token format' })
   }
 
-  const orgSlug = trackerToken.slice(0, colonFirst)
-  const expSlug = trackerToken.slice(colonFirst + 1, colonLast)
-  const label = trackerToken.slice(colonLast + 1).toUpperCase()
+  const expSlug = trackerToken.slice(0, colon)
+  const label = trackerToken.slice(colon + 1).toUpperCase()
 
-  if (!orgSlug || !expSlug || !label) {
+  if (!expSlug || !label) {
     console.warn('[webhook:hotmart] skipped', { reason: 'empty tracker_token parts', trackerToken })
     return NextResponse.json({ ok: true, reason: 'empty tracker_token parts' })
   }
@@ -70,7 +68,6 @@ export async function POST(request: NextRequest) {
     const rows = await db
       .select({ experiment: abExperiments, variant: abVariants })
       .from(abExperiments)
-      .innerJoin(abOrganizations, eq(abExperiments.orgId, abOrganizations.id))
       .innerJoin(
         abVariants,
         and(
@@ -78,16 +75,11 @@ export async function POST(request: NextRequest) {
           eq(abVariants.label, label)
         )
       )
-      .where(
-        and(
-          eq(abOrganizations.slug, orgSlug),
-          eq(abExperiments.slug, expSlug)
-        )
-      )
+      .where(eq(abExperiments.slug, expSlug))
       .limit(1)
 
     if (rows.length === 0) {
-      console.warn('[webhook:hotmart] skipped', { reason: 'experiment not found', orgSlug, expSlug, label })
+      console.warn('[webhook:hotmart] skipped', { reason: 'experiment not found', expSlug, label })
       return NextResponse.json({ ok: true, reason: 'experiment or variant not found' })
     }
 
