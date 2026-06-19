@@ -93,7 +93,9 @@ export default async function ExperimentPage({
     return entry
   })
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
+  const appUrl = process.env.REDIRECT_DOMAIN
+    ? `https://${process.env.REDIRECT_DOMAIN}`
+    : (process.env.NEXT_PUBLIC_APP_URL ?? '')
 
   return (
     <Suspense>

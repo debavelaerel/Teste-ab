@@ -4,7 +4,9 @@ export default async function DocsPage({
   params: Promise<{ orgSlug: string }>
 }) {
   const { orgSlug } = await params
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL
+  const appUrl = process.env.REDIRECT_DOMAIN
+    ? `https://${process.env.REDIRECT_DOMAIN}`
+    : (process.env.NEXT_PUBLIC_APP_URL ?? '')
 
   return (
     <div className="max-w-2xl space-y-8 text-sm">
@@ -16,7 +18,7 @@ export default async function DocsPage({
           <li>Visitante acessa a URL do redirecionador <code className="bg-muted px-1 rounded">/r/{orgSlug}/SEU-SLUG</code></li>
           <li>Se já visitou antes, mantém a mesma variante (cookie pelo período configurado)</li>
           <li>Se novo: variante sorteada conforme o split configurado</li>
-          <li>Redirecionado para a URL da variante com <code className="bg-muted px-1 rounded">?s1={orgSlug}:SEU-SLUG:VARIANTE</code></li>
+          <li>Redirecionado para a URL da variante com <code className="bg-muted px-1 rounded">?s1=SEU-SLUG:VARIANTE</code></li>
           <li>O tracker.js injeta esse parâmetro nos links da Kiwify</li>
           <li>Na compra aprovada, o webhook registra a conversão automaticamente</li>
         </ol>
