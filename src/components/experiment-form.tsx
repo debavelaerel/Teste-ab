@@ -40,6 +40,7 @@ export function ExperimentForm({
   const [checkoutType, setCheckoutType] = useState<'kiwify' | 'hotmart'>(initialCheckoutType)
   const [variants, setVariants] = useState<VariantRow[]>(initialVariants)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const totalWeight = variants.reduce((s, v) => s + v.weight, 0)
@@ -91,17 +92,21 @@ export function ExperimentForm({
       body: JSON.stringify(payload),
     })
 
-    const data = await res.json()
     setLoading(false)
 
     if (!res.ok) {
-      setError(data.error ?? 'Erro desconhecido')
+      const data = await res.json().catch(() => ({}))
+      setError((data as { error?: string }).error ?? 'Erro ao salvar. Tente novamente.')
       return
     }
 
-    const expSlug = experimentId ? slug : data.slug
-    router.push(`/org/${orgSlug}/experiments/${expSlug}`)
-    router.refresh()
+    const data = await res.json().catch(() => ({}))
+    const expSlug = experimentId ? slug : (data as { slug?: string }).slug
+    setSuccess(true)
+    setTimeout(() => {
+      router.push(`/org/${orgSlug}/experiments/${expSlug}`)
+      router.refresh()
+    }, 1500)
   }
 
   return (
@@ -229,6 +234,12 @@ export function ExperimentForm({
           </button>
         )}
       </div>
+
+      {success && (
+        <p className="text-sm text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-lg">
+          {experimentId ? 'Experimento atualizado!' : 'Experimento criado!'}
+        </p>
+      )}
 
       {error && (
         <p className="text-sm text-red-500 bg-red-50 border border-red-100 px-3 py-2 rounded-lg">{error}</p>

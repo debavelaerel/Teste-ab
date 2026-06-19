@@ -108,7 +108,7 @@ export function ResultsSummary({ orgSlug, experimentId, experimentStatus, varian
                     size="sm"
                     variant="outline"
                     onClick={() => declareWinner(v.id)}
-                    disabled={loading === 'finished'}
+                    disabled={!!loading}
                   >
                     Declarar {v.label} vencedor e encerrar
                   </Button>

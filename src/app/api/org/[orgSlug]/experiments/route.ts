@@ -33,8 +33,15 @@ export async function POST(
     variants: { name: string; url: string; weight: number }[]
   }
 
-  if (!name || !slug || !variants || variants.length < 2) {
+  if (!name || !slug) {
     return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
+  }
+
+  if (!Array.isArray(variants) || variants.length < 2 || variants.length > 5) {
+    return NextResponse.json(
+      { error: 'O experimento deve ter entre 2 e 5 variantes' },
+      { status: 400 }
+    )
   }
 
   for (const v of variants) {
