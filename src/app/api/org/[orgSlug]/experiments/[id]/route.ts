@@ -47,7 +47,13 @@ export async function PATCH(
     const update: Partial<typeof abExperiments.$inferInsert> = { status: body.status }
     if (body.status === 'finished') {
       update.finishedAt = new Date()
-      if (body.winnerVariantId) update.winnerVariantId = body.winnerVariantId
+      if (body.winnerVariantId) {
+        const winnerVariant = await db.query.abVariants.findFirst({
+          where: and(eq(abVariants.id, body.winnerVariantId), eq(abVariants.experimentId, id)),
+        })
+        if (!winnerVariant) return NextResponse.json({ error: 'Variant not found' }, { status: 400 })
+        update.winnerVariantId = body.winnerVariantId
+      }
     }
     await db.update(abExperiments).set(update).where(and(eq(abExperiments.id, id), eq(abExperiments.orgId, org.id)))
     return NextResponse.json({ ok: true })
