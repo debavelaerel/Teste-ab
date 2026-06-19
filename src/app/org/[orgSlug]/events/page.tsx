@@ -2,12 +2,13 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
-import { Activity, ShoppingCart, RefreshCw } from 'lucide-react'
+import { Activity, ShoppingCart, RefreshCw, Eye } from 'lucide-react'
 
-type Visit = {
+type Session = {
   id: string
   createdAt: string
   visitorId: string
+  isNewVisitor: string
   experiment: string
   experimentSlug: string
   variant: string
@@ -25,7 +26,7 @@ type Conversion = {
   amount: string | null
 }
 
-type Tab = 'all' | 'visits' | 'conversions'
+type Tab = 'all' | 'sessions' | 'conversions'
 
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime()
@@ -40,7 +41,7 @@ function timeAgo(iso: string) {
 
 export default function EventsPage() {
   const { orgSlug } = useParams<{ orgSlug: string }>()
-  const [visits, setVisits] = useState<Visit[]>([])
+  const [sessions, setSessions] = useState<Session[]>([])
   const [conversions, setConversions] = useState<Conversion[]>([])
   const [loading, setLoading] = useState(true)
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
@@ -51,8 +52,8 @@ export default function EventsPage() {
       const res = await fetch(`/api/org/${orgSlug}/events`)
       if (!res.ok) return
       const data = await res.json()
-      setVisits(data.visits)
-      setConversions(data.conversions)
+      setSessions(data.sessions ?? [])
+      setConversions(data.conversions ?? [])
       setLastRefresh(new Date())
     } finally {
       setLoading(false)
@@ -66,20 +67,23 @@ export default function EventsPage() {
   }, [fetchEvents])
 
   type Event =
-    | { kind: 'visit'; data: Visit }
+    | { kind: 'session'; data: Session }
     | { kind: 'conversion'; data: Conversion }
 
   const allEvents: Event[] = [
-    ...visits.map(v => ({ kind: 'visit' as const, data: v })),
+    ...sessions.map(s => ({ kind: 'session' as const, data: s })),
     ...conversions.map(c => ({ kind: 'conversion' as const, data: c })),
   ].sort((a, b) => new Date(b.data.createdAt).getTime() - new Date(a.data.createdAt).getTime())
 
   const filtered =
-    tab === 'visits'
-      ? allEvents.filter(e => e.kind === 'visit')
+    tab === 'sessions'
+      ? allEvents.filter(e => e.kind === 'session')
       : tab === 'conversions'
         ? allEvents.filter(e => e.kind === 'conversion')
         : allEvents
+
+  const newVisitors = sessions.filter(s => s.isNewVisitor === '1').length
+  const returning = sessions.filter(s => s.isNewVisitor === '0').length
 
   return (
     <div className="max-w-4xl">
@@ -87,7 +91,7 @@ export default function EventsPage() {
         <div>
           <h1 className="text-2xl font-bold font-heading">Auditoria de Eventos</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Últimas 100 visitas e conversões · atualiza a cada 15s
+            Últimos 100 acessos e conversões · atualiza a cada 15s
           </p>
         </div>
         <button
@@ -99,9 +103,27 @@ export default function EventsPage() {
         </button>
       </div>
 
+      {/* Stats */}
+      {!loading && (
+        <div className="grid grid-cols-3 gap-3 mb-5">
+          <div className="rounded-lg border bg-card p-3">
+            <p className="text-xs text-muted-foreground">Total de acessos</p>
+            <p className="text-2xl font-bold font-heading mt-0.5">{sessions.length}</p>
+          </div>
+          <div className="rounded-lg border bg-card p-3">
+            <p className="text-xs text-muted-foreground">Visitantes novos</p>
+            <p className="text-2xl font-bold font-heading mt-0.5 text-primary">{newVisitors}</p>
+          </div>
+          <div className="rounded-lg border bg-card p-3">
+            <p className="text-xs text-muted-foreground">Retornos</p>
+            <p className="text-2xl font-bold font-heading mt-0.5 text-muted-foreground">{returning}</p>
+          </div>
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="flex gap-1 mb-4 bg-muted/40 p-1 rounded-lg w-fit">
-        {(['all', 'visits', 'conversions'] as Tab[]).map(t => (
+        {(['all', 'sessions', 'conversions'] as Tab[]).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -111,7 +133,7 @@ export default function EventsPage() {
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            {t === 'all' ? 'Todos' : t === 'visits' ? `Visitas (${visits.length})` : `Conversões (${conversions.length})`}
+            {t === 'all' ? 'Todos' : t === 'sessions' ? `Acessos (${sessions.length})` : `Conversões (${conversions.length})`}
           </button>
         ))}
       </div>
@@ -130,26 +152,33 @@ export default function EventsPage() {
       ) : (
         <div className="space-y-1.5">
           {filtered.map(event => {
-            if (event.kind === 'visit') {
-              const v = event.data
+            if (event.kind === 'session') {
+              const s = event.data
+              const isNew = s.isNewVisitor === '1'
               return (
-                <div key={`v-${v.id}`} className="flex items-center gap-3 px-4 py-3 rounded-lg border bg-card hover:bg-accent/30 transition-colors">
-                  <div className="w-7 h-7 rounded-full bg-primary-subtle flex items-center justify-center shrink-0">
-                    <Activity className="w-3.5 h-3.5 text-primary" />
+                <div key={`s-${s.id}`} className="flex items-center gap-3 px-4 py-3 rounded-lg border bg-card hover:bg-accent/30 transition-colors">
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${isNew ? 'bg-primary-subtle' : 'bg-muted'}`}>
+                    {isNew ? <Activity className="w-3.5 h-3.5 text-primary" /> : <Eye className="w-3.5 h-3.5 text-muted-foreground" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">{v.experiment}</span>
+                      <span className="text-sm font-medium">{s.experiment}</span>
                       <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono">
-                        {v.variant}
+                        {s.variant}
                       </span>
-                      <span className="text-xs text-muted-foreground">visita</span>
+                      <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
+                        isNew
+                          ? 'bg-primary-subtle text-primary'
+                          : 'bg-muted text-muted-foreground'
+                      }`}>
+                        {isNew ? 'novo' : 'retorno'}
+                      </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5 truncate font-mono">
-                      {v.visitorId.slice(0, 8)}…
+                      {s.visitorId.slice(0, 8)}…
                     </p>
                   </div>
-                  <span className="text-xs text-muted-foreground shrink-0">{timeAgo(v.createdAt)}</span>
+                  <span className="text-xs text-muted-foreground shrink-0">{timeAgo(s.createdAt)}</span>
                 </div>
               )
             }
@@ -167,7 +196,7 @@ export default function EventsPage() {
                       {c.variant}
                     </span>
                     <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">conversão</span>
-                    {c.amount && (
+                    {c.amount && Number(c.amount) > 0 && (
                       <span className="text-xs text-emerald-700 dark:text-emerald-300 font-medium">
                         R$ {Number(c.amount).toFixed(2)}
                       </span>

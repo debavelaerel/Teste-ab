@@ -70,6 +70,21 @@ export const abVisits = pgTable('ab_visits', {
   unique('ab_visits_exp_visitor_unique').on(t.experimentId, t.visitorId),
 ])
 
+export const abSessions = pgTable('ab_sessions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  experimentId: uuid('experiment_id')
+    .notNull()
+    .references(() => abExperiments.id, { onDelete: 'cascade' }),
+  variantId: uuid('variant_id')
+    .notNull()
+    .references(() => abVariants.id, { onDelete: 'cascade' }),
+  visitorId: varchar('visitor_id', { length: 255 }).notNull(),
+  isNewVisitor: varchar('is_new_visitor', { length: 1 }).notNull().default('1'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (t) => [
+  index('ab_sessions_exp_idx').on(t.experimentId, t.createdAt),
+])
+
 export const abConversions = pgTable('ab_conversions', {
   id: uuid('id').defaultRandom().primaryKey(),
   experimentId: uuid('experiment_id')
@@ -125,6 +140,11 @@ export const variantsRelations = relations(abVariants, ({ one, many }) => ({
   wonExperiments: many(abExperiments, { relationName: 'winner' }),
 }))
 
+export const sessionsRelations = relations(abSessions, ({ one }) => ({
+  experiment: one(abExperiments, { fields: [abSessions.experimentId], references: [abExperiments.id] }),
+  variant: one(abVariants, { fields: [abSessions.variantId], references: [abVariants.id] }),
+}))
+
 export const visitsRelations = relations(abVisits, ({ one }) => ({
   experiment: one(abExperiments, { fields: [abVisits.experimentId], references: [abExperiments.id] }),
   variant: one(abVariants, { fields: [abVisits.variantId], references: [abVariants.id] }),
@@ -141,3 +161,4 @@ export type Visit = typeof abVisits.$inferSelect
 export type Conversion = typeof abConversions.$inferSelect
 export type Organization = typeof abOrganizations.$inferSelect
 export type Membership = typeof abMemberships.$inferSelect
+export type Session = typeof abSessions.$inferSelect

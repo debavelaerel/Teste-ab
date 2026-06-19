@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { eq, and } from 'drizzle-orm'
 import { randomUUID } from 'crypto'
 import { db } from '@/db'
-import { abExperiments, abOrganizations, abVariants, abVisits } from '@/db/schema'
+import { abExperiments, abOrganizations, abVariants, abVisits, abSessions } from '@/db/schema'
 
 // 5-minute in-memory cache for experiment + variants lookup
 type CacheEntry = { experiment: typeof abExperiments.$inferSelect; variants: (typeof abVariants.$inferSelect)[]; expiresAt: number }
@@ -91,11 +91,14 @@ export async function GET(
     const isNew = !existingCookie
     if (isNew) {
       console.log('[redirector] new_visit', { orgSlug, expSlug, variant: variant.label, visitorId })
+      db.insert(abVisits)
+        .values({ experimentId: experiment.id, variantId: variant.id, visitorId })
+        .onConflictDoNothing()
+        .catch(err => console.error('[redirector] visit insert failed:', err))
     }
-    db.insert(abVisits)
-      .values({ experimentId: experiment.id, variantId: variant.id, visitorId })
-      .onConflictDoNothing()
-      .catch(err => console.error('[redirector] visit insert failed:', err))
+    db.insert(abSessions)
+      .values({ experimentId: experiment.id, variantId: variant.id, visitorId, isNewVisitor: isNew ? '1' : '0' })
+      .catch(err => console.error('[redirector] session insert failed:', err))
   }
 
   let destUrl: URL
