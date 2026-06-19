@@ -40,31 +40,31 @@ export default async function OrgLayout({
   const userInitials = getInitials(userDisplay)
 
   return (
-    <div className="flex min-h-screen">
-      <aside className="w-64 border-r bg-card flex flex-col shrink-0">
+    <div className="flex min-h-screen bg-background">
+      <aside className="w-56 border-r border-zinc-100 bg-zinc-50 flex flex-col shrink-0">
         {/* Org header */}
-        <div className="h-14 px-4 flex items-center gap-3 shrink-0">
-          <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center shrink-0">
+        <div className="h-14 px-4 flex items-center gap-2.5 shrink-0">
+          <div className="w-7 h-7 rounded-md bg-zinc-900 text-white text-xs font-bold flex items-center justify-center shrink-0 font-mono">
             {orgInitials}
           </div>
-          <span className="text-sm font-semibold truncate">{org.name}</span>
+          <span className="text-sm font-semibold text-zinc-900 truncate">{org.name}</span>
         </div>
 
-        <Separator />
+        <Separator className="bg-zinc-100" />
 
         {/* Nav */}
         <SidebarNav orgSlug={orgSlug} />
 
         <div className="flex-1" />
 
-        <Separator />
+        <Separator className="bg-zinc-100" />
 
         {/* User footer */}
-        <div className="h-14 px-4 flex items-center gap-3 shrink-0">
-          <div className="w-7 h-7 rounded-full bg-muted text-muted-foreground text-xs font-semibold flex items-center justify-center shrink-0">
+        <div className="h-14 px-4 flex items-center gap-2.5 shrink-0">
+          <div className="w-7 h-7 rounded-full bg-zinc-200 text-zinc-600 text-xs font-semibold flex items-center justify-center shrink-0">
             {userInitials}
           </div>
-          <span className="text-xs text-muted-foreground truncate flex-1">{userDisplay}</span>
+          <span className="text-xs text-zinc-500 truncate flex-1">{userDisplay}</span>
           <SignOutButton />
         </div>
       </aside>

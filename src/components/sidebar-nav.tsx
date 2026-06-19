@@ -13,7 +13,7 @@ const NAV_ITEMS = [
       path === `/org/${slug}` || path.startsWith(`/org/${slug}/experiments`),
   },
   {
-    label: 'Eventos',
+    label: 'Observabilidade',
     icon: Activity,
     href: (slug: string) => `/org/${slug}/events`,
     isActive: (path: string, slug: string) => path.startsWith(`/org/${slug}/events`),
@@ -40,16 +40,16 @@ export function SidebarNav({ orgSlug }: Props) {
   const pathname = usePathname()
 
   return (
-    <nav className="flex flex-col gap-1 p-3">
+    <nav className="flex flex-col gap-0.5 p-3">
       {NAV_ITEMS.map(({ label, icon: Icon, href, isActive }) => (
         <Link
           key={label}
           href={href(orgSlug)}
           className={cn(
-            'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
+            'flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors',
             isActive(pathname, orgSlug)
-              ? 'bg-primary-subtle text-primary font-medium'
-              : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+              ? 'bg-zinc-100 text-zinc-900 font-semibold'
+              : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700'
           )}
         >
           <Icon className="w-4 h-4 shrink-0" />
