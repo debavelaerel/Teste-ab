@@ -4,6 +4,34 @@ import { randomUUID } from 'crypto'
 import { db } from '@/db'
 import { abExperiments, abOrganizations, abVariants, abVisits } from '@/db/schema'
 
+// 5-minute in-memory cache for experiment + variants lookup
+type CacheEntry = { experiment: typeof abExperiments.$inferSelect; variants: (typeof abVariants.$inferSelect)[]; expiresAt: number }
+const expCache = new Map<string, CacheEntry>()
+const CACHE_TTL = 5 * 60 * 1000
+
+async function getExperiment(orgSlug: string, expSlug: string) {
+  const key = `${orgSlug}:${expSlug}`
+  const cached = expCache.get(key)
+  if (cached && cached.expiresAt > Date.now()) return cached
+
+  const expRows = await db
+    .select({ experiment: abExperiments })
+    .from(abExperiments)
+    .innerJoin(abOrganizations, eq(abExperiments.orgId, abOrganizations.id))
+    .where(and(eq(abOrganizations.slug, orgSlug), eq(abExperiments.slug, expSlug)))
+    .limit(1)
+
+  if (expRows.length === 0) return null
+
+  const experiment = expRows[0].experiment
+  const variants = await db.query.abVariants.findMany({ where: eq(abVariants.experimentId, experiment.id) })
+  if (variants.length === 0) return null
+
+  const entry: CacheEntry = { experiment, variants, expiresAt: Date.now() + CACHE_TTL }
+  expCache.set(key, entry)
+  return entry
+}
+
 function weightedRandom(variants: { label: string; weight: number }[]): string {
   const total = variants.reduce((s, v) => s + v.weight, 0)
   let rand = Math.random() * total
@@ -20,36 +48,14 @@ export async function GET(
 ) {
   const { orgSlug, expSlug } = await params
 
-  // Find experiment by org slug + experiment slug
-  const expRows = await db
-    .select({ experiment: abExperiments })
-    .from(abExperiments)
-    .innerJoin(abOrganizations, eq(abExperiments.orgId, abOrganizations.id))
-    .where(
-      and(
-        eq(abOrganizations.slug, orgSlug),
-        eq(abExperiments.slug, expSlug)
-      )
-    )
-    .limit(1)
-
-  if (expRows.length === 0) {
+  const cached = await getExperiment(orgSlug, expSlug)
+  if (!cached) {
     const res = new NextResponse('Experiment not found', { status: 404 })
     res.headers.set('Cache-Control', 'no-store')
     return res
   }
 
-  const experiment = expRows[0].experiment
-
-  const variants = await db.query.abVariants.findMany({
-    where: eq(abVariants.experimentId, experiment.id),
-  })
-
-  if (variants.length === 0) {
-    const res = new NextResponse('No variants configured', { status: 404 })
-    res.headers.set('Cache-Control', 'no-store')
-    return res
-  }
+  const { experiment, variants } = cached
 
   const cookieName = `ab_${orgSlug}_${expSlug}`
   const existingCookie = request.cookies.get(cookieName)?.value
