@@ -34,7 +34,9 @@ export async function GET(
     .limit(1)
 
   if (expRows.length === 0) {
-    return new NextResponse('Experiment not found', { status: 404 })
+    const res = new NextResponse('Experiment not found', { status: 404 })
+    res.headers.set('Cache-Control', 'no-store')
+    return res
   }
 
   const experiment = expRows[0].experiment
@@ -44,7 +46,9 @@ export async function GET(
   })
 
   if (variants.length === 0) {
-    return new NextResponse('No variants configured', { status: 404 })
+    const res = new NextResponse('No variants configured', { status: 404 })
+    res.headers.set('Cache-Control', 'no-store')
+    return res
   }
 
   const cookieName = `ab_${orgSlug}_${expSlug}`
