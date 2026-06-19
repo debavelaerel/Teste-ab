@@ -9,10 +9,19 @@ type CacheEntry = { experiment: typeof abExperiments.$inferSelect; variants: (ty
 const expCache = new Map<string, CacheEntry>()
 const CACHE_TTL = 5 * 60 * 1000
 
+function pruneCache() {
+  const now = Date.now()
+  for (const [key, entry] of expCache) {
+    if (entry.expiresAt <= now) expCache.delete(key)
+  }
+}
+
 async function getExperiment(orgSlug: string, expSlug: string) {
   const key = `${orgSlug}:${expSlug}`
   const cached = expCache.get(key)
   if (cached && cached.expiresAt > Date.now()) return cached
+
+  pruneCache()
 
   const expRows = await db
     .select({ experiment: abExperiments })
@@ -79,14 +88,10 @@ export async function GET(
     variants.find((v) => v.label === variantLabel) ?? variants[0]
 
   if (experiment.status === 'active') {
-    await db
-      .insert(abVisits)
-      .values({
-        experimentId: experiment.id,
-        variantId: variant.id,
-        visitorId,
-      })
+    db.insert(abVisits)
+      .values({ experimentId: experiment.id, variantId: variant.id, visitorId })
       .onConflictDoNothing()
+      .catch(err => console.error('[redirector] visit insert failed:', err))
   }
 
   let destUrl: URL
@@ -102,7 +107,7 @@ export async function GET(
     res.headers.set('Cache-Control', 'no-store')
     return res
   }
-  destUrl.searchParams.set('s1', `${expSlug}:${variant.label}`)
+  destUrl.searchParams.set('s1', `${orgSlug}:${expSlug}:${variant.label}`)
 
   const response = NextResponse.redirect(destUrl.toString(), { status: 302 })
 
