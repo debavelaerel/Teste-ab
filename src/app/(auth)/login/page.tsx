@@ -1,22 +1,8 @@
 'use client'
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Eye, EyeOff, Mail, Lock, ArrowLeft, Check } from 'lucide-react'
+import { Eye, EyeOff, Mail, ArrowLeft } from 'lucide-react'
 import { authClient } from '@/lib/auth-client'
-
-/* ── Helpers ── */
-function calcStrength(pwd: string) {
-  const checks = {
-    length:  pwd.length >= 6,
-    upper:   /[A-Z]/.test(pwd),
-    number:  /[0-9]/.test(pwd),
-    special: /[!@#$%^&*]/.test(pwd),
-  }
-  return { checks, score: Object.values(checks).filter(Boolean).length }
-}
-
-const STRENGTH_LABELS = ['', 'Fraca', 'Regular', 'Boa', 'Forte']
-const STRENGTH_COLORS = ['', '#ef4444', '#f59e0b', '#3b82f6', '#22c55e']
 
 /* ── Sub-components ── */
 function Logo({ center = false }: { center?: boolean }) {
