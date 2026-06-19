@@ -87,7 +87,7 @@ export async function GET(
   const variant =
     variants.find((v) => v.label === variantLabel) ?? variants[0]
 
-  if (experiment.status === 'active') {
+  if (experiment.status === 'active' || experiment.status === 'paused') {
     const isNew = !existingCookie
     if (isNew) {
       console.log('[redirector] new_visit', { orgSlug, expSlug, variant: variant.label, visitorId })

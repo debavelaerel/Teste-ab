@@ -54,7 +54,7 @@ export async function GET(
     const cr = convRows.find(r => r.variantId === v.id)
     const visits = Number(vr?.visits ?? 0)
     const conversions = Number(cr?.conversions ?? 0)
-    return { id: v.id, label: v.label, name: v.name, color: v.color, visits, conversions, rate: visits > 0 ? conversions / visits : 0, revenue: cr?.revenue ?? '0' }
+    return { id: v.id, label: v.label, name: v.name, color: v.color, visits, conversions, rate: visits > 0 ? conversions / visits : 0, revenue: parseFloat(cr?.revenue ?? '0') || 0 }
   })
 
   const allDates = [...new Set([...dailyVisitRows.map(r => r.date), ...dailyConvRows.map(r => r.date)])].sort()

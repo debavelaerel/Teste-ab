@@ -91,6 +91,13 @@ export async function PATCH(
         }
       }
     }
+    const totalWeight = variants.reduce((sum, v) => sum + (v.weight ?? 0), 0)
+    if (totalWeight !== 100) {
+      return NextResponse.json(
+        { error: `A soma dos pesos deve ser 100 (atual: ${totalWeight})` },
+        { status: 400 }
+      )
+    }
     for (const v of variants) {
       if (v.id) {
         await db.update(abVariants)
